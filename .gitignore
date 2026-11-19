@@ -39,7 +39,7 @@ Thumbs.db
 
 # Misc
 *.zip
-_all_files_combined.txt
+all_files_combined.txt
 _api_combined.txt
 _models_combined.txt
 _routes_combined.txt
