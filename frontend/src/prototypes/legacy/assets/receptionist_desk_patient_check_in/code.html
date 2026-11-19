@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="web_dashboard" name="shell-type"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<style>
+    @layer base {
+      html, body { margin: 0; padding: 0; }
+      body { overscroll-behavior: none; }
+    }
+    ::-webkit-scrollbar { display: none; }
+    .font-mono-code { font-family: 'JetBrains Mono', monospace; }
+  </style>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface": "#F8FAFC",
+            "surface-card": "#FFFFFF",
+            "line": "#E2E8F0",
+            "line-subtle": "#F1F5F9",
+            "on-surface": "#0F172A",
+            "on-surface-muted": "#64748B",
+            "brand": "#1E40AF",
+            "brand-light": "#EFF6FF",
+            "accent-teal": "#0D9488",
+            "accent-green": "#16A34A",
+            "accent-amber": "#D97706",
+            "accent-rose": "#E11D48"
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-surface font-sans text-on-surface text-[13px] antialiased">
+<!-- Minimal Top Navigation -->
+<header class="fixed top-0 left-0 right-0 h-14 bg-surface-card border-b border-line z-40 flex items-center justify-between px-6">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2.5">
+<img alt="CuraPulse Logo" class="h-6 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7iMQxYMruXKW6mZj39AT7wu9JopASx5xxE56GPjfQ-K8hOJu8QFNljcBChTRL_TXBOUgpGmQx0s8EM5VJZWAqAjWUilK0L1F-cBfBR2bVrGwFIamKDKEWJjYuOXqTnI0supxwvUDxedgKj_cPiMjO1tH0ZOk3hPigf5kCx2CvDZxI_WgHqKo5dvtVG_6FAwiuS5pD7KEjPB9f_vTq8s7zKMwOj9k0vXFlfYzJsb6C"/>
+<span class="font-bold text-[15px] tracking-tight text-slate-900">CuraPulse</span>
+<span class="text-xs px-2 py-0.5 rounded text-slate-500 bg-slate-100 font-medium ml-1">Desk OS</span>
+</div>
+<div class="h-4 w-px bg-line"></div>
+<div class="flex items-center gap-2 text-xs text-slate-600">
+<span class="material-symbols-outlined text-[16px] text-slate-400">domain</span>
+<span class="font-medium text-slate-800">Apex Health Hub</span>
+<span class="text-slate-400">•</span>
+<span>Indiranagar, BLR</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative w-64">
+<span class="material-symbols-outlined absolute left-2.5 top-2 text-[16px] text-slate-400">search</span>
+<input class="w-full bg-slate-50 border border-line rounded-md pl-8 pr-12 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-slate-300 transition-all" placeholder="Quick find... (⌘K)" type="text"/>
+<kbd class="absolute right-2 top-2 text-[10px] text-slate-400 font-mono">⌘K</kbd>
+</div>
+<div class="h-4 w-px bg-line"></div>
+<div class="flex items-center gap-2.5">
+<div class="text-right">
+<div class="font-semibold text-xs text-slate-900">Dr. Rajesh Sharma</div>
+<div class="text-[11px] text-slate-500">MD Cardiologist</div>
+</div>
+<img alt="Doctor" class="w-7 h-7 rounded-full object-cover border border-line" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD1zKdn45Kc-lfdKi9dSYCUhTDSVhjP-ZMn8mQdNCx4FLIy9TB4Q55jYc9mgMXGbqR0YP00_Heqz7EBFkoPUNJUUdH0Lqo2ycZEYeBD_fdOh60HRMOWIvjiIMpdL40p0euwPnBRNnOI_3Qzo-vFtpWQOzxILuye8clV4YTpWqUAGv2Xws4BOJqmzEPg1wCl1K9u2cQNMYH0vdMr6v8RuXwZzBqjj2-Mn6rUDTK5-cCE"/>
+</div>
+</div>
+</header>
+<!-- Slim Minimal Sidebar -->
+<aside class="fixed left-0 top-14 bottom-0 w-56 bg-surface-card border-r border-line z-30 flex flex-col py-4 px-3">
+<nav class="space-y-5 text-xs">
+<div>
+<div class="px-2.5 pb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Workspace</div>
+<div class="space-y-0.5">
+<a class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-50" href="#">
+<span class="material-symbols-outlined text-[17px]">dashboard</span>
+<span>Overview</span>
+</a>
+<a class="flex items-center justify-between px-2.5 py-1.5 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-50" href="#">
+<span class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-[17px]">schedule</span>
+<span>Today's Schedule</span>
+</span>
+<span class="text-[10px] font-semibold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">9</span>
+</a>
+<a class="flex items-center justify-between px-2.5 py-1.5 rounded-md bg-slate-900 text-white font-medium shadow-sm" href="#">
+<span class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-[17px]">desk</span>
+<span>Reception Desk</span>
+</span>
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+</a>
+<a class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-50" href="#">
+<span class="material-symbols-outlined text-[17px]">groups</span>
+<span>Patients</span>
+</a>
+</div>
+</div>
+<div>
+<div class="px-2.5 pb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Operations</div>
+<div class="space-y-0.5">
+<a class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-50" href="#">
+<span class="material-symbols-outlined text-[17px]">flowsheet</span>
+<span>Dynamic Queue</span>
+</a>
+<a class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-50" href="#">
+<span class="material-symbols-outlined text-[17px]">timelapse</span>
+<span>Slots &amp; Availability</span>
+</a>
+<a class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-50" href="#">
+<span class="material-symbols-outlined text-[17px]">payments</span>
+<span>Cash Counter</span>
+</a>
+</div>
+</div>
+</nav>
+</aside>
+<!-- Main Content Space -->
+<main class="pl-56 pt-14 min-h-screen">
+<div class="max-w-[1440px] mx-auto p-7">
+<!-- Top Header Row -->
+<div class="flex flex-col md:flex-row md:items-center justify-between pb-6 border-b border-line gap-4">
+<div>
+<div class="flex items-center gap-2 text-xs text-slate-500 mb-1">
+<span class="font-medium text-slate-900">Reception Desk</span>
+<span>•</span>
+<span>Morning OPD (08:30 – 14:00)</span>
+<span>•</span>
+<span>Desk Operator: <span class="text-slate-800 font-medium">Sneha Patil</span></span>
+</div>
+<h1 class="text-2xl font-semibold tracking-tight text-slate-900">Patient Check-In &amp; Queue Dispatch</h1>
+</div>
+<!-- Clean Action Buttons -->
+<div class="flex items-center gap-2.5">
+<button class="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs shadow-sm transition-all" onclick="toggleWalkInModal(true)">
+<span class="material-symbols-outlined text-[16px]">add</span>
+<span>Register Walk-In</span>
+<kbd class="text-[10px] text-slate-300 font-mono bg-slate-800 px-1.5 py-0.5 rounded ml-0.5">F2</kbd>
+</button>
+<button class="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-white border border-line hover:bg-slate-50 text-slate-800 font-medium text-xs transition-all" onclick="focusQuickSearch()">
+<span class="material-symbols-outlined text-[16px] text-slate-500">bolt</span>
+<span>Fast Check-In</span>
+<kbd class="text-[10px] text-slate-500 font-mono bg-slate-100 px-1.5 py-0.5 rounded ml-0.5">F1</kbd>
+</button>
+</div>
+</div>
+<!-- Quick Stat Strip: 5 Clean Metric Cards with Breathing Room -->
+<div class="grid grid-cols-2 md:grid-cols-5 gap-4 py-6">
+<!-- 1: Today's Scheduled -->
+<div class="bg-surface-card border border-line rounded-xl p-4">
+<div class="text-[11px] font-medium text-slate-500 uppercase tracking-wide">Today's Scheduled</div>
+<div class="text-2xl font-semibold text-slate-900 mt-2 tracking-tight">42</div>
+<div class="text-xs text-slate-400 mt-1">Confirmed appointments</div>
+</div>
+<!-- 2: In Waiting -->
+<div class="bg-surface-card border border-line rounded-xl p-4">
+<div class="text-[11px] font-medium text-slate-500 uppercase tracking-wide">In Waiting</div>
+<div class="text-2xl font-semibold text-slate-900 mt-2 tracking-tight">9</div>
+<div class="text-xs text-teal-600 mt-1 font-medium">Avg wait time ~12 min</div>
+</div>
+<!-- 3: In Consultation -->
+<div class="bg-surface-card border border-line rounded-xl p-4">
+<div class="text-[11px] font-medium text-slate-500 uppercase tracking-wide">In Consultation</div>
+<div class="text-2xl font-semibold text-slate-900 mt-2 tracking-tight">2</div>
+<div class="text-xs text-slate-400 mt-1">Chambers active (102, 104)</div>
+</div>
+<!-- 4: Completed -->
+<div class="bg-surface-card border border-line rounded-xl p-4">
+<div class="text-[11px] font-medium text-slate-500 uppercase tracking-wide">Completed</div>
+<div class="text-2xl font-semibold text-slate-900 mt-2 tracking-tight">26</div>
+<div class="text-xs text-slate-400 mt-1">62% daily OPD cleared</div>
+</div>
+<!-- 5: Total Cash/UPI -->
+<div class="bg-surface-card border border-line rounded-xl p-4">
+<div class="text-[11px] font-medium text-slate-500 uppercase tracking-wide">Total Cash / UPI</div>
+<div class="text-2xl font-semibold text-slate-900 mt-2 tracking-tight">₹16,400</div>
+<div class="text-xs text-slate-400 mt-1">Token: ₹2.4k | Desk: ₹14.0k</div>
+</div>
+</div>
+<!-- Two-Column Operational Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+<!-- Left / Main Column (8 Cols) -->
+<div class="lg:col-span-8 space-y-6">
+<!-- Express Patient Lookup Section -->
+<div class="bg-surface-card border border-line rounded-xl p-5 shadow-xs">
+<div class="flex items-center justify-between mb-4">
+<div>
+<h2 class="text-sm font-semibold text-slate-900">Express Patient Lookup</h2>
+<p class="text-xs text-slate-500 mt-0.5">Quick search by Token #, Booking ID, Phone, or Patient Name</p>
+</div>
+<span class="inline-flex items-center gap-1.5 text-xs text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Scanner Ready
+              </span>
+</div>
+<!-- Minimal Search Bar -->
+<div class="relative mb-4">
+<span class="material-symbols-outlined absolute left-3.5 top-3 text-[18px] text-slate-400">search</span>
+<input class="w-full bg-slate-50 border border-line rounded-lg pl-10 pr-28 py-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-slate-400 transition-all font-mono" id="quick-search-input" placeholder="Scan barcode or type ID (e.g. CP-8924, +91 98450...)" type="text" value="CP-8924"/>
+<div class="absolute right-2.5 top-2">
+<span class="text-[10px] text-slate-500 bg-slate-200/70 px-2 py-1 rounded font-medium">Auto-Detect</span>
+</div>
+</div>
+<!-- Clean Verification Card -->
+<div class="border border-line rounded-lg p-4 bg-slate-50/50">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3.5 mb-3.5 border-b border-line gap-3">
+<div class="flex items-center gap-3">
+<img class="w-12 h-12 rounded-lg object-cover border border-line" data-alt="Patient profile portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCL34Wajo4ZEtpvuMPApDQ2J28VA2KqDWIijwYYwsGr5cq48hiyDLSfWB_yHsllPrrSxzcg-8N8RZjneWR3lPClDmY3IQ_SrXvp4aONLf9fboOu-n7IQnc6_kV0yfvak3rsudS-h83foeONVR3QBIuRZiQ1AowF5WikQH8d2WrV_k3hwR0xZrwk2vIE8BjCzSkFhXtJoyzcTWq1EoC5KbbBCqvIUXVkNXm34HEAuwQD"/>
+<div>
+<div class="flex items-center gap-2">
+<span class="text-sm font-semibold text-slate-900">Kavita Swaminathan</span>
+<span class="text-xs text-slate-500">48 / F</span>
+<span class="text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-medium">Online Verified</span>
+</div>
+<div class="text-xs text-slate-500 mt-0.5 flex items-center gap-2">
+<span>+91 98450 31209</span>
+<span>•</span>
+<span>Cardiology Follow-Up</span>
+<span>•</span>
+<span class="font-mono text-slate-600">Slot: 10:30 AM</span>
+</div>
+</div>
+</div>
+<!-- Assigned Doctor -->
+<div class="sm:text-right text-xs">
+<div class="text-slate-400 text-[11px]">Assigned Doctor</div>
+<div class="font-medium text-slate-900">Dr. Rajesh Sharma</div>
+<div class="text-slate-500 text-[11px]">Chamber #102</div>
+</div>
+</div>
+<!-- Quick Fee Status -->
+<div class="flex flex-wrap items-center justify-between gap-4">
+<div class="flex items-center gap-6 text-xs">
+<div>
+<span class="text-slate-400 block text-[11px]">Total Fee</span>
+<span class="font-semibold text-slate-800">₹500</span>
+</div>
+<div>
+<span class="text-slate-400 block text-[11px]">Token Advance</span>
+<span class="font-medium text-emerald-600">₹100 Paid</span>
+</div>
+<div>
+<span class="text-slate-400 block text-[11px]">Counter Balance</span>
+<span class="font-semibold text-slate-900">₹400 Due</span>
+</div>
+</div>
+<!-- Action group -->
+<div class="flex items-center gap-2">
+<button class="px-3.5 py-1.5 rounded-md bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs transition-colors" onclick="handleCheckInSuccess('Kavita Swaminathan', '10', '400')">
+                    Collect ₹400 &amp; Admit
+                  </button>
+<button class="px-3 py-1.5 rounded-md bg-white border border-line hover:bg-slate-100 text-slate-700 font-medium text-xs transition-colors" onclick="triggerToast('Token slip printed for Kavita Swaminathan')">
+                    Print Slip
+                  </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Today's Queue Data Table (Linear / Stripe Inspired) -->
+<div class="bg-surface-card border border-line rounded-xl overflow-hidden shadow-xs">
+<div class="p-4 flex flex-col sm:flex-row sm:items-center justify-between border-b border-line gap-3">
+<div>
+<h3 class="text-sm font-semibold text-slate-900">Today's Appointment Queue</h3>
+<p class="text-xs text-slate-500 mt-0.5">Real-time status synced with doctor chamber monitors</p>
+</div>
+<div class="flex items-center gap-1.5">
+<button class="px-2.5 py-1 rounded text-xs font-medium bg-slate-100 text-slate-900">All (42)</button>
+<button class="px-2.5 py-1 rounded text-xs font-medium text-slate-600 hover:bg-slate-50">Waiting (9)</button>
+<button class="px-2.5 py-1 rounded text-xs font-medium text-slate-600 hover:bg-slate-50">Unchecked (5)</button>
+<button class="px-2.5 py-1 rounded text-xs font-medium text-slate-600 hover:bg-slate-50">Completed (26)</button>
+</div>
+</div>
+<!-- Table -->
+<div class="overflow-x-auto">
+<table class="w-full text-left text-xs border-collapse">
+<thead>
+<tr class="border-b border-line bg-slate-50/70 text-slate-500 text-[11px] uppercase tracking-wider font-medium">
+<th class="py-3 px-4">Token #</th>
+<th class="py-3 px-4">Patient</th>
+<th class="py-3 px-4">Doctor</th>
+<th class="py-3 px-4">Slot</th>
+<th class="py-3 px-4">Token Status</th>
+<th class="py-3 px-4">Balance</th>
+<th class="py-3 px-4">Queue Status</th>
+<th class="py-3 px-4 text-right">Quick Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-line text-slate-800">
+<!-- Row 1 -->
+<tr class="hover:bg-slate-50/60 transition-colors">
+<td class="py-3.5 px-4 font-mono font-semibold text-slate-900">#11</td>
+<td class="py-3.5 px-4">
+<div class="font-medium text-slate-900">Suresh Iyer</div>
+<div class="text-[11px] text-slate-500">54y • Male • +91 98201 44521</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="font-medium">Dr. Sharma</div>
+<div class="text-[11px] text-slate-500">Cardiology</div>
+</td>
+<td class="py-3.5 px-4 font-mono text-slate-600">10:45 AM</td>
+<td class="py-3.5 px-4 text-emerald-600 font-medium">₹100 Paid</td>
+<td class="py-3.5 px-4 font-semibold text-slate-900">₹400</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-teal-50 text-teal-700">
+<span class="w-1.5 h-1.5 rounded-full bg-teal-500"></span> Waiting (Next)
+                      </span>
+</td>
+<td class="py-3.5 px-4 text-right">
+<button class="px-2.5 py-1 rounded bg-slate-900 hover:bg-slate-800 text-white font-medium text-[11px] transition-colors" onclick="triggerToast('Collected ₹400 for Suresh Iyer. Admitted to Room 102.')">
+                        Admit to Room
+                      </button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-slate-50/60 transition-colors">
+<td class="py-3.5 px-4 font-mono font-medium text-slate-400">#12</td>
+<td class="py-3.5 px-4">
+<div class="font-medium text-slate-900">Meera Nambiar</div>
+<div class="text-[11px] text-slate-500">39y • Female • +91 97410 88219</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="font-medium">Dr. Sharma</div>
+<div class="text-[11px] text-slate-500">Cardiology</div>
+</td>
+<td class="py-3.5 px-4 font-mono text-slate-600">11:00 AM</td>
+<td class="py-3.5 px-4 text-emerald-600 font-medium">₹100 Paid</td>
+<td class="py-3.5 px-4 font-semibold text-slate-900">₹400</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-600">
+                        Confirmed (Not in)
+                      </span>
+</td>
+<td class="py-3.5 px-4 text-right">
+<button class="px-2.5 py-1 rounded border border-line hover:bg-slate-100 text-slate-700 font-medium text-[11px] transition-colors" onclick="triggerToast('Checked in Meera Nambiar. Waiting queue updated.')">
+                        Check In
+                      </button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-slate-50/60 transition-colors">
+<td class="py-3.5 px-4 font-mono font-semibold text-slate-900">#13</td>
+<td class="py-3.5 px-4">
+<div class="font-medium text-slate-900">Mohammed Farhan</div>
+<div class="text-[11px] text-slate-500">28y • Male • +91 99805 12044</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="font-medium">Dr. Priya Sen</div>
+<div class="text-[11px] text-slate-500">General Medicine</div>
+</td>
+<td class="py-3.5 px-4 font-mono text-slate-600">11:15 AM</td>
+<td class="py-3.5 px-4 text-emerald-600 font-medium">₹150 Paid</td>
+<td class="py-3.5 px-4 font-semibold text-slate-900">₹450</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-teal-50 text-teal-700">
+<span class="w-1.5 h-1.5 rounded-full bg-teal-500"></span> In Waiting
+                      </span>
+</td>
+<td class="py-3.5 px-4 text-right">
+<button class="px-2.5 py-1 rounded border border-line hover:bg-slate-100 text-slate-700 font-medium text-[11px] transition-colors" onclick="triggerToast('Collected ₹450 from Mohammed Farhan via Counter QR')">
+                        Collect ₹450
+                      </button>
+</td>
+</tr>
+<!-- Row 4 (Walk-in) -->
+<tr class="hover:bg-slate-50/60 transition-colors">
+<td class="py-3.5 px-4 font-mono font-semibold text-slate-900">
+<span class="inline-flex items-center gap-1.5">
+<span>#14</span>
+<span class="text-[9px] px-1 py-0.2 text-slate-600 bg-slate-100 rounded font-sans uppercase">Walk-in</span>
+</span>
+</td>
+<td class="py-3.5 px-4">
+<div class="font-medium text-slate-900">Ramesh Patel</div>
+<div class="text-[11px] text-slate-500">62y • Male • +91 94250 67112</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="font-medium">Dr. Sharma</div>
+<div class="text-[11px] text-slate-500">Cardiology</div>
+</td>
+<td class="py-3.5 px-4 font-mono text-slate-600">11:30 AM</td>
+<td class="py-3.5 px-4 text-slate-500 font-medium">₹0 (Desk)</td>
+<td class="py-3.5 px-4 font-semibold text-slate-900">₹500</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-amber-50 text-amber-700">
+                        Payment Pending
+                      </span>
+</td>
+<td class="py-3.5 px-4 text-right">
+<button class="px-2.5 py-1 rounded bg-slate-900 hover:bg-slate-800 text-white font-medium text-[11px] transition-colors" onclick="triggerToast('Received ₹500 Cash. Ramesh Patel admitted to queue.')">
+                        Collect ₹500
+                      </button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Footer -->
+<div class="p-3.5 bg-slate-50 border-t border-line flex items-center justify-between text-[11px] text-slate-500">
+<span>Showing 4 of 42 patients scheduled today</span>
+<span>Keyboard: Use <kbd class="px-1.5 py-0.5 bg-white border border-line rounded font-mono">↑</kbd> <kbd class="px-1.5 py-0.5 bg-white border border-line rounded font-mono">↓</kbd> to select row</span>
+</div>
+</div>
+</div>
+<!-- Right Column (4 Cols): Thermal Slip & Active Doctors -->
+<div class="lg:col-span-4 space-y-6">
+<!-- Clean 80mm Token Slip Preview -->
+<div class="bg-surface-card border border-line rounded-xl p-5 shadow-xs">
+<div class="flex items-center justify-between pb-3 border-b border-line mb-4">
+<span class="text-xs font-semibold text-slate-900 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-slate-500">receipt_long</span>
+                Token Slip Preview (80mm)
+              </span>
+<span class="text-[11px] font-mono text-slate-400">EPSON TM-T82</span>
+</div>
+<!-- Simulated High-Contrast Thermal Receipt -->
+<div class="bg-slate-50 border border-line rounded-lg p-5 font-mono text-slate-900 text-xs">
+<!-- Clinic Header -->
+<div class="text-center pb-3 border-b border-dashed border-slate-300">
+<div class="font-bold text-sm tracking-wider uppercase">CuraPulse Clinic</div>
+<div class="text-[10px] text-slate-500">Apex Health Hub, Indiranagar, BLR</div>
+<div class="text-[10px] text-slate-400 mt-1">24-OCT-2024 • 10:33 AM</div>
+</div>
+<!-- Main Token Display -->
+<div class="py-4 text-center border-b border-dashed border-slate-300">
+<div class="text-[10px] tracking-widest text-slate-500 uppercase">Token Number</div>
+<div class="text-4xl font-extrabold tracking-tight text-slate-900 my-1 font-mono">#10</div>
+<div class="text-[11px] text-slate-600 font-sans font-medium">Estimated Turn: 10:40 AM</div>
+</div>
+<!-- Details Grid -->
+<div class="py-3 space-y-1.5 text-[11px] border-b border-dashed border-slate-300 font-sans">
+<div class="flex justify-between">
+<span class="text-slate-500">Patient:</span>
+<span class="font-semibold text-slate-900">Kavita Swaminathan (48/F)</span>
+</div>
+<div class="flex justify-between">
+<span class="text-slate-500">Consulting:</span>
+<span class="font-medium text-slate-900">Dr. Rajesh Sharma</span>
+</div>
+<div class="flex justify-between">
+<span class="text-slate-500">Chamber:</span>
+<span class="font-medium text-slate-900">Room #102 (Ground Flr)</span>
+</div>
+<div class="flex justify-between pt-1">
+<span class="text-slate-500">Fee Status:</span>
+<span class="font-semibold text-slate-900">Paid: ₹500 (Bal: ₹0)</span>
+</div>
+</div>
+<!-- Mini QR Placeholder / Mobile Note -->
+<div class="pt-3 text-center">
+<div class="inline-block p-1.5 bg-white border border-slate-200 rounded mb-1">
+<span class="material-symbols-outlined text-[32px] text-slate-800">qr_code_2</span>
+</div>
+<div class="text-[10px] text-slate-400">Scan QR on receipt for live queue updates</div>
+</div>
+</div>
+<!-- Receipt Actions -->
+<div class="mt-4 flex items-center gap-2">
+<button class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs transition-colors" onclick="triggerToast('Token slip sent to thermal printer')">
+<span class="material-symbols-outlined text-[16px]">print</span>
+<span>Print Slip</span>
+</button>
+<button class="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border border-line hover:bg-slate-50 text-slate-700 font-medium text-xs transition-colors" onclick="triggerToast('WhatsApp &amp; SMS token sent to +91 98450 31209')">
+<span class="material-symbols-outlined text-[16px] text-slate-500">sms</span>
+<span>Send SMS</span>
+</button>
+</div>
+</div>
+<!-- Active Doctors Status -->
+<div class="bg-surface-card border border-line rounded-xl p-5 shadow-xs">
+<div class="flex items-center justify-between pb-3 border-b border-line mb-3">
+<span class="text-xs font-semibold text-slate-900">Active Consultation Rooms</span>
+<span class="text-[11px] text-slate-500 font-medium">3 Registered</span>
+</div>
+<div class="space-y-2.5">
+<!-- Room 102 -->
+<div class="p-2.5 rounded-lg border border-line bg-slate-50/50 flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+<div>
+<div class="text-xs font-semibold text-slate-900">Dr. Rajesh Sharma</div>
+<div class="text-[11px] text-slate-500">Chamber 102 • Cardiology</div>
+</div>
+</div>
+<div class="text-right">
+<div class="text-[11px] font-mono font-medium text-slate-800">Token #09</div>
+<div class="text-[10px] text-emerald-600 font-medium">In Chamber</div>
+</div>
+</div>
+<!-- Room 104 -->
+<div class="p-2.5 rounded-lg border border-line bg-slate-50/50 flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+<div>
+<div class="text-xs font-semibold text-slate-900">Dr. Priya Sen</div>
+<div class="text-[11px] text-slate-500">Chamber 104 • General Med</div>
+</div>
+</div>
+<div class="text-right">
+<div class="text-[11px] font-mono font-medium text-slate-800">Token #08</div>
+<div class="text-[10px] text-emerald-600 font-medium">In Chamber</div>
+</div>
+</div>
+<!-- Room 106 -->
+<div class="p-2.5 rounded-lg border border-line bg-slate-50/50 flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<span class="w-2 h-2 rounded-full bg-slate-300"></span>
+<div>
+<div class="text-xs font-semibold text-slate-900">Dr. Ananya Roy</div>
+<div class="text-[11px] text-slate-500">Chamber 106 • Pediatrics</div>
+</div>
+</div>
+<div class="text-right">
+<div class="text-[11px] text-slate-500">Starts 11:00 AM</div>
+<div class="text-[10px] text-slate-400">Idle / Standby</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Walk-In Registration Modal -->
+<div class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4" id="walkin-modal">
+<div class="bg-white rounded-xl border border-line shadow-xl max-w-lg w-full overflow-hidden">
+<!-- Modal Header -->
+<div class="px-5 py-4 border-b border-line flex items-center justify-between">
+<div>
+<h3 class="text-sm font-semibold text-slate-900">Register Walk-In Patient</h3>
+<p class="text-xs text-slate-500 mt-0.5">Assigned into the next dynamic gap slot without disrupting schedule</p>
+</div>
+<button class="text-slate-400 hover:text-slate-600" onclick="toggleWalkInModal(false)">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+<!-- Modal Body -->
+<form class="p-5 space-y-4" onsubmit="handleWalkInSubmit(event)">
+<div>
+<label class="block text-xs font-medium text-slate-700 mb-1">Patient Full Name *</label>
+<input class="w-full bg-slate-50 border border-line rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-slate-400" placeholder="e.g. Ramesh Patel" required="" type="text"/>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<div>
+<label class="block text-xs font-medium text-slate-700 mb-1">Phone Number (+91) *</label>
+<input class="w-full bg-slate-50 border border-line rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-slate-400" placeholder="98765 43210" required="" type="tel"/>
+</div>
+<div class="grid grid-cols-2 gap-2">
+<div>
+<label class="block text-xs font-medium text-slate-700 mb-1">Age</label>
+<input class="w-full bg-slate-50 border border-line rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-slate-400" type="number" value="45"/>
+</div>
+<div>
+<label class="block text-xs font-medium text-slate-700 mb-1">Gender</label>
+<select class="w-full bg-slate-50 border border-line rounded-lg px-2 py-2 text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-slate-400">
+<option>Male</option>
+<option>Female</option>
+<option>Other</option>
+</select>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<div>
+<label class="block text-xs font-medium text-slate-700 mb-1">Consulting Doctor</label>
+<select class="w-full bg-slate-50 border border-line rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-slate-400">
+<option>Dr. Rajesh Sharma (Cardiology)</option>
+<option>Dr. Priya Sen (General Medicine)</option>
+<option>Dr. Ananya Roy (Pediatrics)</option>
+</select>
+</div>
+<div>
+<label class="block text-xs font-medium text-slate-700 mb-1">Auto-Slot Allocated</label>
+<div class="bg-slate-100 border border-line rounded-lg px-3 py-2 text-xs font-mono text-slate-800">
+              11:30 AM (Gap #14)
+            </div>
+</div>
+</div>
+<div class="bg-slate-50 border border-line rounded-lg p-3 text-xs">
+<div class="flex justify-between text-slate-600 mb-1">
+<span>Consultation Fee:</span>
+<span class="font-medium text-slate-900">₹500.00</span>
+</div>
+<div class="flex justify-between text-slate-900 font-semibold pt-1 border-t border-line">
+<span>Total Payable at Counter:</span>
+<span>₹500.00</span>
+</div>
+</div>
+<div class="flex items-center justify-end gap-2 pt-2">
+<button class="px-3 py-2 rounded-lg border border-line text-slate-600 hover:bg-slate-50 text-xs font-medium" onclick="toggleWalkInModal(false)" type="button">
+            Cancel
+          </button>
+<button class="px-4 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium shadow-sm" type="submit">
+            Confirm &amp; Issue Token #15
+          </button>
+</div>
+</form>
+</div>
+</div>
+<!-- Toast Notification -->
+<div class="fixed bottom-6 right-6 z-50 transform translate-y-16 opacity-0 transition-all duration-200 pointer-events-none" id="toast">
+<div class="bg-slate-900 text-white text-xs px-4 py-2.5 rounded-lg shadow-lg flex items-center gap-2">
+<span class="material-symbols-outlined text-emerald-400 text-[16px]">check_circle</span>
+<span id="toast-message">Operation successful</span>
+</div>
+</div>
+<script>
+    function triggerToast(msg) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-message');
+      if (toast && toastMsg) {
+        toastMsg.textContent = msg;
+        toast.classList.remove('translate-y-16', 'opacity-0');
+        toast.classList.add('translate-y-0', 'opacity-100');
+        setTimeout(() => {
+          toast.classList.add('translate-y-16', 'opacity-0');
+          toast.classList.remove('translate-y-0', 'opacity-100');
+        }, 3000);
+      }
+    }
+
+    function toggleWalkInModal(show) {
+      const modal = document.getElementById('walkin-modal');
+      if (!modal) return;
+      if (show) {
+        modal.classList.remove('hidden');
+      } else {
+        modal.classList.add('hidden');
+      }
+    }
+
+    function focusQuickSearch() {
+      const input = document.getElementById('quick-search-input');
+      if (input) {
+        input.focus();
+        input.select();
+      }
+    }
+
+    function handleCheckInSuccess(name, token, balance) {
+      triggerToast(`Checked in ${name} (Token #${token}). ₹${balance} collection recorded.`);
+    }
+
+    function handleWalkInSubmit(e) {
+      e.preventDefault();
+      toggleWalkInModal(false);
+      triggerToast('Walk-in patient registered. Token #15 generated and printed.');
+    }
+
+    // Keyboard Shortcuts
+    window.addEventListener('keydown', function(e) {
+      if (e.key === 'F2') {
+        e.preventDefault();
+        toggleWalkInModal(true);
+      }
+      if (e.key === 'F1') {
+        e.preventDefault();
+        focusQuickSearch();
+      }
+      if (e.key === 'Escape') {
+        toggleWalkInModal(false);
+      }
+    });
+  </script>
+</body></html>

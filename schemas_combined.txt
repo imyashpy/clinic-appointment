@@ -1,0 +1,425 @@
+COMBINED SCHEMA SOURCE
+Generated from app/schemas/*.py. Each section contains the full source of the named file.
+
+
+======================================================================
+FILE: app/schemas/__init__.py
+======================================================================
+[Empty file]
+
+
+======================================================================
+FILE: app/schemas/admin.py
+======================================================================
+from typing import Literal
+
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+
+
+class ClinicCreate(BaseModel):
+    name: str = Field(min_length=2, max_length=150)
+    address: str | None = Field(default=None, max_length=255)
+    city: str | None = Field(default=None, max_length=100)
+    phone: str | None = None
+
+    @field_validator("name")
+    @classmethod
+    def clean_name(cls, v: str) -> str:
+        v = " ".join(v.split())
+        if len(v) < 2:
+            raise ValueError("Name is too short")
+        return v
+
+    @field_validator("phone")
+    @classmethod
+    def check_phone(cls, v: str | None) -> str | None:
+        if v is None or v.strip() == "":
+            return None
+        v = v.replace(" ", "").replace("-", "")
+        if not v.isdigit() or not (8 <= len(v) <= 15):
+            raise ValueError("Enter a valid phone number")
+        return v
+
+
+class ClinicOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    name: str
+    address: str | None
+    city: str | None
+    phone: str | None
+    is_active: bool
+
+
+class StaffBase(BaseModel):
+    name: str = Field(min_length=2, max_length=100)
+    phone: str
+    email: str | None = Field(default=None, max_length=150)
+    password: str = Field(min_length=8, max_length=72)
+    clinic_id: int
+
+    @field_validator("name")
+    @classmethod
+    def clean_name(cls, v: str) -> str:
+        v = " ".join(v.split())
+        if len(v) < 2:
+            raise ValueError("Name is too short")
+        return v
+
+    @field_validator("phone")
+    @classmethod
+    def check_phone(cls, v: str) -> str:
+        v = v.replace(" ", "")
+        if len(v) != 10 or not v.isdigit() or v[0] not in "6789":
+            raise ValueError("Enter a valid 10-digit mobile number")
+        return v
+
+    @field_validator("email")
+    @classmethod
+    def check_email(cls, v: str | None) -> str | None:
+        if v is None or v.strip() == "":
+            return None
+        v = v.strip()
+        if "@" not in v or v.startswith("@") or "." not in v.split("@")[-1]:
+            raise ValueError("Enter a valid email address")
+        return v
+
+    @field_validator("password")
+    @classmethod
+    def check_password_bytes(cls, v: str) -> str:
+        # bcrypt only accepts up to 72 bytes
+        if len(v.encode("utf-8")) > 72:
+            raise ValueError("Password is too long")
+        return v
+
+
+class DoctorCreate(StaffBase):
+    specialty: str = Field(min_length=2, max_length=100)
+    qualification: str | None = Field(default=None, max_length=150)
+    consultation_fee: int = Field(ge=1, le=100000)
+    token_amount: int = Field(ge=1, le=100000)
+    slot_duration_minutes: Literal[15, 20, 30, 45, 60] = 30
+
+    @model_validator(mode="after")
+    def token_not_above_fee(self):
+        if self.token_amount > self.consultation_fee:
+            raise ValueError("token_amount cannot be more than the consultation fee")
+        return self
+
+
+class ReceptionistCreate(StaffBase):
+    doctor_id: int | None = None  # leave empty for a receptionist of the whole clinic
+
+
+class StaffOut(BaseModel):
+    user_id: int
+    profile_id: int
+    name: str
+    phone: str
+    role: str
+    clinic_id: int
+
+
+======================================================================
+FILE: app/schemas/appointment.py
+======================================================================
+from datetime import datetime
+
+from pydantic import BaseModel, Field
+
+
+class BookRequest(BaseModel):
+    slot_id: int
+    reason: str = Field(min_length=1, max_length=255)
+    medical_notes: str | None = Field(default=None, max_length=2000)
+
+
+class AppointmentOut(BaseModel):
+    id: int
+    booking_reference: str
+    doctor_name: str
+    specialty: str
+    start_at: datetime
+    end_at: datetime
+    status: str
+    payment_status: str
+    consultation_fee: int
+    token_amount: int
+    remaining_amount: int
+    credit_applied: int = 0
+    token_due: int = 0
+    pay_before: datetime | None = None
+
+
+class DoctorAppointmentOut(BaseModel):
+    id: int
+    booking_reference: str
+    start_at: datetime
+    end_at: datetime
+    status: str
+    payment_status: str
+    remaining_amount: int
+    patient_name: str
+    patient_phone: str
+    patient_age: int | None
+    patient_gender: str | None
+    reason: str | None
+    medical_notes: str | None
+
+
+======================================================================
+FILE: app/schemas/auth.py
+======================================================================
+from datetime import date
+from typing import Literal
+
+from pydantic import BaseModel, Field, field_validator
+
+
+class LoginRequest(BaseModel):
+    phone: str
+    password: str
+
+
+class LoginResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    user_id: int
+    name: str
+    role: str
+    is_new_user: bool = False
+
+
+class OtpRequest(BaseModel):
+    phone: str
+
+
+class MessageResponse(BaseModel):
+    message: str
+
+
+class OtpVerifyRequest(BaseModel):
+    phone: str
+    code: str
+    # Only needed the first time, when the number has no account yet
+    name: str | None = Field(default=None, max_length=100)
+    email: str | None = Field(default=None, max_length=150)
+    date_of_birth: date | None = None
+    gender: Literal["male", "female", "other"] | None = None
+
+    @field_validator("name")
+    @classmethod
+    def clean_name(cls, v: str | None) -> str | None:
+        if v is None:
+            return None
+        v = " ".join(v.split())
+        if v == "":
+            return None
+        if len(v) < 2:
+            raise ValueError("Name is too short")
+        return v
+
+    @field_validator("email")
+    @classmethod
+    def check_email(cls, v: str | None) -> str | None:
+        if v is None or v.strip() == "":
+            return None
+        v = v.strip()
+        if "@" not in v or v.startswith("@") or "." not in v.split("@")[-1]:
+            raise ValueError("Enter a valid email address")
+        return v
+
+    @field_validator("date_of_birth")
+    @classmethod
+    def check_dob(cls, v: date | None) -> date | None:
+        if v is None:
+            return v
+        if v >= date.today():
+            raise ValueError("Date of birth must be in the past")
+        if v.year < date.today().year - 120:
+            raise ValueError("Enter a valid date of birth")
+        return v
+
+
+======================================================================
+FILE: app/schemas/credit.py
+======================================================================
+from datetime import datetime
+from typing import Literal
+
+from pydantic import BaseModel
+
+
+class CreditOut(BaseModel):
+    id: int
+    patient_id: int
+    patient_name: str
+    patient_phone: str
+    amount: int
+    expires_at: datetime
+    source_booking_reference: str
+    source_doctor_name: str
+    source_start_at: datetime
+
+
+class RefundRequest(BaseModel):
+    method: Literal["cash", "upi"]
+
+
+class RefundResult(BaseModel):
+    credit_id: int
+    amount: int
+    method: str
+    status: str
+    transaction_reference: str
+
+
+======================================================================
+FILE: app/schemas/doctor.py
+======================================================================
+from datetime import datetime
+
+from pydantic import BaseModel
+
+
+class DoctorOut(BaseModel):
+    id: int
+    name: str
+    specialty: str
+    qualification: str | None
+    clinic_name: str
+    consultation_fee: int
+    token_amount: int
+    slot_duration_minutes: int
+
+
+class SlotOut(BaseModel):
+    id: int
+    start_at: datetime
+    end_at: datetime
+    status: str  # available, locked, booked
+
+
+======================================================================
+FILE: app/schemas/earnings.py
+======================================================================
+from datetime import date
+
+from pydantic import BaseModel
+
+
+class EarningsOut(BaseModel):
+    period: str
+    start: date
+    end: date  # last day included
+    token_collected: int
+    remaining_collected: int
+    online_collected: int
+    cash_collected: int
+    upi_collected: int
+    total_collected: int
+    refunds: int
+    net_collected: int
+    consultation_revenue: int
+    forfeited_tokens: int
+    outstanding: int
+    appointments_total: int
+    completed: int
+    no_show: int
+    cancelled: int
+
+
+======================================================================
+FILE: app/schemas/payment.py
+======================================================================
+from typing import Literal
+
+from pydantic import BaseModel
+
+
+class CollectRequest(BaseModel):
+    method: Literal["cash", "upi"]
+
+
+class CollectResult(BaseModel):
+    appointment_id: int
+    booking_reference: str
+    status: str
+    payment_status: str
+    amount_collected: int
+    method: str
+    transaction_reference: str
+
+
+======================================================================
+FILE: app/schemas/reception.py
+======================================================================
+from datetime import date
+
+from pydantic import BaseModel
+
+from app.schemas.appointment import DoctorAppointmentOut
+
+
+class ReceptionAppointmentOut(DoctorAppointmentOut):
+    doctor_name: str
+    specialty: str
+
+
+class ReceptionDashboard(BaseModel):
+    day: date
+    total_appointments: int
+    arrived: int
+    waiting: int
+    in_consultation: int
+    completed: int
+    not_arrived: int
+    no_show: int
+    cancelled: int
+    token_collected: int
+    remaining_collected: int
+    total_received: int
+    remaining_pending: int
+
+
+======================================================================
+FILE: app/schemas/schedule.py
+======================================================================
+from datetime import time
+
+from pydantic import BaseModel, ConfigDict, Field, model_validator
+
+
+class ScheduleDay(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    day_of_week: int = Field(ge=0, le=6)  # 0 = Monday ... 6 = Sunday
+    start_time: time
+    end_time: time
+    break_start: time | None = None
+    break_end: time | None = None
+
+    @model_validator(mode="after")
+    def check_times(self):
+        if self.end_time <= self.start_time:
+            raise ValueError("end_time must be after start_time")
+        if (self.break_start is None) != (self.break_end is None):
+            raise ValueError("break_start and break_end must be given together")
+        if self.break_start is not None:
+            if self.break_end <= self.break_start:
+                raise ValueError("break_end must be after break_start")
+            if self.break_start < self.start_time or self.break_end > self.end_time:
+                raise ValueError("break must be inside working hours")
+        return self
+
+
+class ScheduleUpdate(BaseModel):
+    days: list[ScheduleDay]
+
+    @model_validator(mode="after")
+    def no_duplicate_days(self):
+        days = [d.day_of_week for d in self.days]
+        if len(days) != len(set(days)):
+            raise ValueError("Each day can appear only once")
+        return self

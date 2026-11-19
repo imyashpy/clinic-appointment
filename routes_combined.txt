@@ -1,0 +1,1228 @@
+COMBINED API ROUTE SOURCE
+Generated from app/api/routes/*.py. Each section contains the full source of the named file.
+
+
+======================================================================
+FILE: app/api/routes/__init__.py
+======================================================================
+[Empty file]
+
+
+======================================================================
+FILE: app/api/routes/admin_clinics.py
+======================================================================
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+
+from app.api.deps import require_roles
+from app.core.database import get_db
+from app.models import AuditLog, Clinic, User
+from app.schemas.admin import ClinicCreate, ClinicOut
+
+router = APIRouter(prefix="/admin/clinics", tags=["Admin"])
+
+
+@router.post("", response_model=ClinicOut, status_code=201)
+def create_clinic(
+    data: ClinicCreate,
+    user: User = Depends(require_roles("super_admin")),
+    db: Session = Depends(get_db),
+):
+    exists = (
+        db.query(Clinic)
+        .filter(Clinic.name == data.name, Clinic.city == data.city)
+        .first()
+    )
+    if exists:
+        raise HTTPException(
+            status_code=409, detail="A clinic with this name already exists in this city"
+        )
+
+    clinic = Clinic(
+        name=data.name, address=data.address, city=data.city, phone=data.phone
+    )
+    db.add(clinic)
+    db.flush()
+    db.add(
+        AuditLog(
+            user_id=user.id,
+            action="clinic_created",
+            entity_type="clinic",
+            entity_id=clinic.id,
+            details=f"name={clinic.name}; city={clinic.city}",
+        )
+    )
+    db.commit()
+    return clinic
+
+
+@router.get("", response_model=list[ClinicOut])
+def list_clinics(
+    user: User = Depends(require_roles("super_admin")),
+    db: Session = Depends(get_db),
+):
+    return db.query(Clinic).order_by(Clinic.name).all()
+
+
+======================================================================
+FILE: app/api/routes/admin_staff.py
+======================================================================
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
+
+from app.api.deps import require_roles
+from app.core.database import get_db
+from app.core.security import hash_password
+from app.models import AuditLog, Clinic, Doctor, Receptionist, User
+from app.schemas.admin import DoctorCreate, ReceptionistCreate, StaffOut
+
+router = APIRouter(prefix="/admin", tags=["Admin"])
+
+PHONE_TAKEN = "This mobile number is already registered"
+
+
+def _active_clinic(db: Session, clinic_id: int) -> Clinic:
+    clinic = db.get(Clinic, clinic_id)
+    if not clinic or not clinic.is_active:
+        raise HTTPException(status_code=404, detail="Clinic not found")
+    return clinic
+
+
+def _new_user(db: Session, data, role: str) -> User:
+    if db.query(User).filter(User.phone == data.phone).first():
+        raise HTTPException(status_code=409, detail=PHONE_TAKEN)
+    user = User(
+        name=data.name,
+        phone=data.phone,
+        email=data.email,
+        password_hash=hash_password(data.password),
+        role=role,  # set here, never taken from the request
+    )
+    db.add(user)
+    db.flush()
+    return user
+
+
+@router.post("/doctors", response_model=StaffOut, status_code=201)
+def create_doctor(
+    data: DoctorCreate,
+    admin: User = Depends(require_roles("super_admin")),
+    db: Session = Depends(get_db),
+):
+    clinic = _active_clinic(db, data.clinic_id)
+    try:
+        user = _new_user(db, data, "doctor")
+        doctor = Doctor(
+            user_id=user.id,
+            clinic_id=clinic.id,
+            specialty=data.specialty,
+            qualification=data.qualification,
+            consultation_fee=data.consultation_fee,
+            token_amount=data.token_amount,
+            slot_duration_minutes=data.slot_duration_minutes,
+        )
+        db.add(doctor)
+        db.flush()
+        db.add(
+            AuditLog(
+                user_id=admin.id,
+                action="doctor_created",
+                entity_type="doctor",
+                entity_id=doctor.id,
+                details=f"name={user.name}; clinic={clinic.id}; specialty={data.specialty}",
+            )
+        )
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=409, detail=PHONE_TAKEN)
+
+    return StaffOut(
+        user_id=user.id,
+        profile_id=doctor.id,
+        name=user.name,
+        phone=user.phone,
+        role=user.role,
+        clinic_id=clinic.id,
+    )
+
+
+@router.post("/receptionists", response_model=StaffOut, status_code=201)
+def create_receptionist(
+    data: ReceptionistCreate,
+    admin: User = Depends(require_roles("super_admin")),
+    db: Session = Depends(get_db),
+):
+    clinic = _active_clinic(db, data.clinic_id)
+
+    if data.doctor_id is not None:
+        doctor = db.get(Doctor, data.doctor_id)
+        if not doctor or doctor.clinic_id != clinic.id:
+            raise HTTPException(
+                status_code=404, detail="Doctor not found in this clinic"
+            )
+
+    try:
+        user = _new_user(db, data, "receptionist")
+        receptionist = Receptionist(
+            user_id=user.id, clinic_id=clinic.id, doctor_id=data.doctor_id
+        )
+        db.add(receptionist)
+        db.flush()
+        db.add(
+            AuditLog(
+                user_id=admin.id,
+                action="receptionist_created",
+                entity_type="receptionist",
+                entity_id=receptionist.id,
+                details=f"name={user.name}; clinic={clinic.id}; doctor={data.doctor_id}",
+            )
+        )
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=409, detail=PHONE_TAKEN)
+
+    return StaffOut(
+        user_id=user.id,
+        profile_id=receptionist.id,
+        name=user.name,
+        phone=user.phone,
+        role=user.role,
+        clinic_id=clinic.id,
+    )
+
+
+======================================================================
+FILE: app/api/routes/appointments.py
+======================================================================
+import os
+import uuid
+from datetime import datetime
+from typing import Literal
+
+from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import BaseModel
+from sqlalchemy import or_
+from sqlalchemy.orm import Session
+
+from app.api.deps import require_roles
+from app.core.database import get_db
+from app.models import Appointment, Patient, Payment, User
+from app.schemas.appointment import AppointmentOut, BookRequest
+from app.services.booking_service import start_booking, to_appointment_out
+from app.services.cancellation_service import cancel_by_patient
+from app.services.expiry_service import expire_stale_bookings
+from app.services.payment_service import confirm_token_payment
+
+router = APIRouter(prefix="/appointments", tags=["Appointments"])
+
+ACTIVE_STATUSES = [
+    "payment_pending",
+    "confirmed",
+    "arrived",
+    "waiting",
+    "in_consultation",
+]
+
+
+class CancelResult(BaseModel):
+    appointment_id: int
+    booking_reference: str
+    status: str
+    credit_amount: int
+    credit_valid_until: datetime
+    message: str
+
+
+def get_my_patient(user: User, db: Session) -> Patient:
+    patient = db.query(Patient).filter(Patient.user_id == user.id).first()
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient profile not found")
+    return patient
+
+
+@router.post("", response_model=AppointmentOut, status_code=201)
+def book(
+    data: BookRequest,
+    user: User = Depends(require_roles("patient")),
+    db: Session = Depends(get_db),
+):
+    appointment = start_booking(
+        db, user, data.slot_id, data.reason, data.medical_notes
+    )
+    return to_appointment_out(db, appointment)
+
+
+@router.get("/my", response_model=list[AppointmentOut])
+def my_appointments(
+    when: Literal["upcoming", "past", "all"] = Query("all"),
+    user: User = Depends(require_roles("patient")),
+    db: Session = Depends(get_db),
+):
+    patient = get_my_patient(user, db)
+    expire_stale_bookings(db, patient.id)
+
+    now = datetime.now()
+    query = db.query(Appointment).filter(Appointment.patient_id == patient.id)
+
+    if when == "upcoming":
+        query = query.filter(
+            Appointment.status.in_(ACTIVE_STATUSES), Appointment.end_at > now
+        ).order_by(Appointment.start_at)
+    elif when == "past":
+        query = query.filter(
+            or_(
+                ~Appointment.status.in_(ACTIVE_STATUSES),
+                Appointment.end_at <= now,
+            )
+        ).order_by(Appointment.start_at.desc())
+    else:
+        query = query.order_by(Appointment.start_at.desc())
+
+    return [to_appointment_out(db, a) for a in query.all()]
+
+
+@router.post("/{appointment_id}/pay-mock", response_model=AppointmentOut)
+def pay_mock(
+    appointment_id: int,
+    user: User = Depends(require_roles("patient")),
+    db: Session = Depends(get_db),
+):
+    # Development only: replaced by the real gateway callback later
+    if os.getenv("ENABLE_MOCK_PAYMENT") != "true":
+        raise HTTPException(status_code=404, detail="Not found")
+
+    patient = db.query(Patient).filter(Patient.user_id == user.id).first()
+    appointment = db.get(Appointment, appointment_id)
+    if not patient or not appointment or appointment.patient_id != patient.id:
+        raise HTTPException(status_code=404, detail="Appointment not found")
+
+    payment = (
+        db.query(Payment)
+        .filter(
+            Payment.appointment_id == appointment.id,
+            Payment.payment_type == "token",
+        )
+        .order_by(Payment.id.desc())
+        .first()
+    )
+    if not payment:
+        raise HTTPException(status_code=404, detail="Payment not found")
+
+    appointment = confirm_token_payment(
+        db,
+        payment.transaction_reference,
+        "mock",
+        "MOCK-" + uuid.uuid4().hex[:16].upper(),
+        user.id,
+    )
+    return to_appointment_out(db, appointment)
+
+
+@router.post("/{appointment_id}/cancel", response_model=CancelResult)
+def cancel(
+    appointment_id: int,
+    user: User = Depends(require_roles("patient")),
+    db: Session = Depends(get_db),
+):
+    appointment, credit = cancel_by_patient(db, user, appointment_id)
+    return CancelResult(
+        appointment_id=appointment.id,
+        booking_reference=appointment.booking_reference,
+        status=appointment.status,
+        credit_amount=credit.amount,
+        credit_valid_until=credit.expires_at,
+        message=(
+            f"Rs {credit.amount} is kept for you until {credit.expires_at:%d %b %Y, %I:%M %p}. "
+            "Book a new slot or collect it at the hospital."
+        ),
+    )
+
+
+======================================================================
+FILE: app/api/routes/appointment_actions.py
+======================================================================
+from fastapi import APIRouter, Depends
+from pydantic import BaseModel
+from sqlalchemy.orm import Session
+
+from app.api.deps import require_roles
+from app.core.database import get_db
+from app.models import Appointment, User
+from app.schemas.payment import CollectRequest, CollectResult
+from app.services import appointment_actions as actions
+from app.services.collection_service import collect_remaining
+
+router = APIRouter(prefix="/appointments", tags=["Appointment Actions"])
+
+
+class ActionResult(BaseModel):
+    id: int
+    booking_reference: str
+    status: str
+
+
+def _result(a: Appointment) -> ActionResult:
+    return ActionResult(id=a.id, booking_reference=a.booking_reference, status=a.status)
+
+
+@router.post("/{appointment_id}/check-in", response_model=ActionResult)
+def check_in(
+    appointment_id: int,
+    user: User = Depends(require_roles("receptionist")),
+    db: Session = Depends(get_db),
+):
+    return _result(actions.check_in(db, user, appointment_id))
+
+
+@router.post("/{appointment_id}/start", response_model=ActionResult)
+def start(
+    appointment_id: int,
+    user: User = Depends(require_roles("doctor")),
+    db: Session = Depends(get_db),
+):
+    return _result(actions.start_consultation(db, user, appointment_id))
+
+
+@router.post("/{appointment_id}/complete", response_model=ActionResult)
+def complete(
+    appointment_id: int,
+    user: User = Depends(require_roles("doctor")),
+    db: Session = Depends(get_db),
+):
+    return _result(actions.complete_consultation(db, user, appointment_id))
+
+
+@router.post("/{appointment_id}/no-show", response_model=ActionResult)
+def no_show(
+    appointment_id: int,
+    user: User = Depends(require_roles("receptionist", "doctor")),
+    db: Session = Depends(get_db),
+):
+    return _result(actions.mark_no_show(db, user, appointment_id))
+
+
+@router.post("/{appointment_id}/collect-payment", response_model=CollectResult)
+def collect_payment(
+    appointment_id: int,
+    data: CollectRequest,
+    user: User = Depends(require_roles("receptionist")),
+    db: Session = Depends(get_db),
+):
+    appointment, payment = collect_remaining(db, user, appointment_id, data.method)
+    return CollectResult(
+        appointment_id=appointment.id,
+        booking_reference=appointment.booking_reference,
+        status=appointment.status,
+        payment_status=appointment.payment_status,
+        amount_collected=payment.amount,
+        method=payment.method,
+        transaction_reference=payment.transaction_reference,
+    )
+
+
+======================================================================
+FILE: app/api/routes/auth.py
+======================================================================
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
+
+from app.api.deps import get_current_user
+from app.core.database import get_db
+from app.core.security import create_access_token, verify_password
+from app.models import Patient, User
+from app.schemas.auth import (
+    LoginRequest,
+    LoginResponse,
+    MessageResponse,
+    OtpRequest,
+    OtpVerifyRequest,
+)
+from app.services.otp_service import normalize_phone, request_otp, verify_otp
+
+router = APIRouter(prefix="/auth", tags=["Auth"])
+
+
+@router.post("/otp/request", response_model=MessageResponse)
+def otp_request(data: OtpRequest, db: Session = Depends(get_db)):
+    request_otp(db, data.phone)
+    # Same reply for every number, so nobody can find out who is registered
+    return MessageResponse(message="If this number can receive a code, it has been sent")
+
+
+@router.post("/otp/verify", response_model=LoginResponse)
+def otp_verify(data: OtpVerifyRequest, db: Session = Depends(get_db)):
+    phone = normalize_phone(data.phone)
+    user = db.query(User).filter(User.phone == phone).first()
+
+    if user is None and not data.name:
+        # New number: check the code without using it up, then ask for the name
+        verify_otp(db, phone, data.code, consume=False)
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Name is required to create your account",
+        )
+
+    verify_otp(db, phone, data.code, consume=True)
+
+    is_new = False
+    if user is None:
+        user = User(
+            name=data.name,
+            phone=phone,
+            email=data.email,
+            password_hash=None,  # patients have no password
+            role="patient",  # always patient, never taken from the request
+        )
+        db.add(user)
+        try:
+            db.flush()
+            db.add(
+                Patient(
+                    user_id=user.id,
+                    full_name=data.name,
+                    phone=phone,
+                    date_of_birth=data.date_of_birth,
+                    gender=data.gender,
+                )
+            )
+            db.commit()
+        except IntegrityError:
+            db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="This mobile number is already registered",
+            )
+        is_new = True
+    elif user.role != "patient" or not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="This account cannot use OTP login",
+        )
+
+    token = create_access_token(user.id, user.role)
+    return LoginResponse(
+        access_token=token,
+        user_id=user.id,
+        name=user.name,
+        role=user.role,
+        is_new_user=is_new,
+    )
+
+
+@router.post("/login", response_model=LoginResponse)
+def staff_login(data: LoginRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.phone == data.phone).first()
+
+    # Patients have no password and use OTP. Same message for every failure.
+    if (
+        not user
+        or user.role == "patient"
+        or not user.password_hash
+        or not verify_password(data.password, user.password_hash)
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid phone or password",
+        )
+
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="This account is disabled",
+        )
+
+    token = create_access_token(user.id, user.role)
+    return LoginResponse(
+        access_token=token,
+        user_id=user.id,
+        name=user.name,
+        role=user.role,
+    )
+
+
+@router.get("/me")
+def me(user: User = Depends(get_current_user)):
+    return {
+        "id": user.id,
+        "name": user.name,
+        "phone": user.phone,
+        "role": user.role,
+    }
+
+
+======================================================================
+FILE: app/api/routes/doctors.py
+======================================================================
+from datetime import date, datetime, time, timedelta
+
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy.orm import Session
+
+from app.api.deps import get_current_user
+from app.core.database import get_db
+from app.models import Clinic, Doctor, Slot, User
+from app.schemas.doctor import DoctorOut, SlotOut
+
+router = APIRouter(prefix="/doctors", tags=["Doctors"])
+
+
+@router.get("", response_model=list[DoctorOut])
+def list_doctors(
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    rows = (
+        db.query(Doctor, User, Clinic)
+        .join(User, User.id == Doctor.user_id)
+        .join(Clinic, Clinic.id == Doctor.clinic_id)
+        .filter(User.is_active == True, Clinic.is_active == True)  # noqa: E712
+        .order_by(User.name)
+        .all()
+    )
+    return [
+        DoctorOut(
+            id=d.id,
+            name=u.name,
+            specialty=d.specialty,
+            qualification=d.qualification,
+            clinic_name=c.name,
+            consultation_fee=d.consultation_fee,
+            token_amount=d.token_amount,
+            slot_duration_minutes=d.slot_duration_minutes,
+        )
+        for d, u, c in rows
+    ]
+
+
+@router.get("/{doctor_id}/slots", response_model=list[SlotOut])
+def doctor_slots(
+    doctor_id: int,
+    day: date = Query(...),
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    if not db.get(Doctor, doctor_id):
+        raise HTTPException(status_code=404, detail="Doctor not found")
+
+    day_start = datetime.combine(day, time.min)
+    day_end = day_start + timedelta(days=1)
+    now = datetime.now()
+
+    slots = (
+        db.query(Slot)
+        .filter(
+            Slot.doctor_id == doctor_id,
+            Slot.start_at >= day_start,
+            Slot.start_at < day_end,
+            Slot.start_at > now,  # past slots are never shown
+            Slot.status != "blocked",
+        )
+        .order_by(Slot.start_at)
+        .all()
+    )
+
+    result = []
+    for s in slots:
+        slot_status = s.status
+        # A lock that has expired counts as free again
+        if slot_status == "locked" and (s.locked_until is None or s.locked_until <= now):
+            slot_status = "available"
+        result.append(
+            SlotOut(id=s.id, start_at=s.start_at, end_at=s.end_at, status=slot_status)
+        )
+    return result
+
+
+======================================================================
+FILE: app/api/routes/doctor_appointments.py
+======================================================================
+from datetime import date, datetime, time, timedelta
+
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy.orm import Session
+
+from app.api.routes.schedule import get_my_doctor
+from app.core.database import get_db
+from app.models import Appointment, Doctor, Patient
+from app.schemas.appointment import DoctorAppointmentOut
+from app.services.expiry_service import expire_stale_bookings
+
+router = APIRouter(prefix="/doctors/me/appointments", tags=["Doctor Appointments"])
+
+
+def _age(dob: date | None) -> int | None:
+    if not dob:
+        return None
+    today = date.today()
+    return today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
+
+
+@router.get("", response_model=list[DoctorAppointmentOut])
+def my_day(
+    day: date | None = Query(None, description="Defaults to today"),
+    doctor: Doctor = Depends(get_my_doctor),
+    db: Session = Depends(get_db),
+):
+    expire_stale_bookings(db)
+
+    day = day or date.today()
+    day_start = datetime.combine(day, time.min)
+    day_end = day_start + timedelta(days=1)
+
+    rows = (
+        db.query(Appointment, Patient)
+        .join(Patient, Patient.id == Appointment.patient_id)
+        .filter(
+            Appointment.doctor_id == doctor.id,
+            Appointment.start_at >= day_start,
+            Appointment.start_at < day_end,
+            # Bookings that were never paid never reached the doctor
+            Appointment.payment_status != "pending",
+        )
+        .order_by(Appointment.start_at)
+        .all()
+    )
+
+    return [
+        DoctorAppointmentOut(
+            id=a.id,
+            booking_reference=a.booking_reference,
+            start_at=a.start_at,
+            end_at=a.end_at,
+            status=a.status,
+            payment_status=a.payment_status,
+            remaining_amount=(
+                0
+                if a.payment_status == "fully_paid"
+                else a.consultation_fee - a.token_amount
+            ),
+            patient_name=p.full_name,
+            patient_phone=p.phone,
+            patient_age=_age(p.date_of_birth),
+            patient_gender=p.gender,
+            reason=a.reason,
+            medical_notes=a.medical_notes,
+        )
+        for a, p in rows
+    ]
+
+
+======================================================================
+FILE: app/api/routes/doctor_earnings.py
+======================================================================
+from datetime import date, datetime, time, timedelta
+from typing import Literal
+
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy import func
+from sqlalchemy.orm import Session
+
+from app.api.routes.schedule import get_my_doctor
+from app.core.database import get_db
+from app.models import Appointment, Doctor, Payment, Refund
+from app.schemas.earnings import EarningsOut
+
+router = APIRouter(prefix="/doctors/me/earnings", tags=["Doctor Earnings"])
+
+OPEN_STATUSES = ["confirmed", "arrived", "waiting", "in_consultation", "completed"]
+
+
+def _range(period: str, anchor: date) -> tuple[date, date]:
+    if period == "day":
+        return anchor, anchor
+    if period == "week":
+        start = anchor - timedelta(days=anchor.weekday())  # Monday
+        return start, start + timedelta(days=6)
+    start = anchor.replace(day=1)
+    next_month = (start + timedelta(days=32)).replace(day=1)
+    return start, next_month - timedelta(days=1)
+
+
+@router.get("", response_model=EarningsOut)
+def earnings(
+    period: Literal["day", "week", "month"] = Query("day"),
+    day: date | None = Query(None, description="Any day inside the period, defaults to today"),
+    doctor: Doctor = Depends(get_my_doctor),
+    db: Session = Depends(get_db),
+):
+    start_day, end_day = _range(period, day or date.today())
+    start = datetime.combine(start_day, time.min)
+    end = datetime.combine(end_day, time.min) + timedelta(days=1)
+
+    # Money received in the period. A payment later refunded still counts as received.
+    rows = (
+        db.query(
+            Payment.payment_type,
+            Payment.method,
+            func.coalesce(func.sum(Payment.amount), 0),
+        )
+        .join(Appointment, Appointment.id == Payment.appointment_id)
+        .filter(
+            Appointment.doctor_id == doctor.id,
+            Payment.paid_at >= start,
+            Payment.paid_at < end,
+            Payment.status.in_(["success", "refunded"]),
+            Payment.payment_type.in_(["token", "remaining"]),
+        )
+        .group_by(Payment.payment_type, Payment.method)
+        .all()
+    )
+    token = remaining = online = cash = upi = 0
+    for payment_type, method, total in rows:
+        total = int(total)
+        if payment_type == "token":
+            token += total
+        else:
+            remaining += total
+        if method == "online":
+            online += total
+        elif method == "cash":
+            cash += total
+        elif method == "upi":
+            upi += total
+
+    refunds = int(
+        db.query(func.coalesce(func.sum(Refund.amount), 0))
+        .join(Appointment, Appointment.id == Refund.appointment_id)
+        .filter(
+            Appointment.doctor_id == doctor.id,
+            Refund.status == "processed",
+            Refund.processed_at >= start,
+            Refund.processed_at < end,
+        )
+        .scalar()
+    )
+
+    appointments = (
+        db.query(Appointment)
+        .filter(
+            Appointment.doctor_id == doctor.id,
+            Appointment.start_at >= start,
+            Appointment.start_at < end,
+        )
+        .all()
+    )
+
+    completed = [a for a in appointments if a.status == "completed"]
+    no_shows = [a for a in appointments if a.status == "no_show"]
+    cancelled = [a for a in appointments if a.status == "cancelled"]
+
+    outstanding = sum(
+        a.consultation_fee - a.token_amount
+        for a in appointments
+        if a.payment_status == "token_paid" and a.status in OPEN_STATUSES
+    )
+
+    total_collected = token + remaining
+    return EarningsOut(
+        period=period,
+        start=start_day,
+        end=end_day,
+        token_collected=token,
+        remaining_collected=remaining,
+        online_collected=online,
+        cash_collected=cash,
+        upi_collected=upi,
+        total_collected=total_collected,
+        refunds=refunds,
+        net_collected=total_collected - refunds,
+        consultation_revenue=sum(a.consultation_fee for a in completed),
+        forfeited_tokens=sum(
+            a.token_amount for a in no_shows if a.payment_status == "token_paid"
+        ),
+        outstanding=outstanding,
+        appointments_total=len(appointments),
+        completed=len(completed),
+        no_show=len(no_shows),
+        cancelled=len(cancelled),
+    )
+
+
+======================================================================
+FILE: app/api/routes/reception.py
+======================================================================
+from collections import Counter
+from datetime import date, datetime, time, timedelta
+
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import func
+from sqlalchemy.orm import Session
+
+from app.api.deps import require_roles
+from app.core.database import get_db
+from app.models import Appointment, Doctor, Patient, Payment, Receptionist, User
+from app.schemas.reception import ReceptionAppointmentOut, ReceptionDashboard
+from app.services.expiry_service import expire_stale_bookings
+
+router = APIRouter(prefix="/reception", tags=["Reception"])
+
+
+def _age(dob: date | None) -> int | None:
+    if not dob:
+        return None
+    today = date.today()
+    return today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
+
+
+def _my_receptionist(db: Session, user: User) -> Receptionist:
+    receptionist = db.query(Receptionist).filter(Receptionist.user_id == user.id).first()
+    if not receptionist:
+        raise HTTPException(status_code=404, detail="Receptionist profile not found")
+    return receptionist
+
+
+def _day_bounds(day: date | None):
+    day = day or date.today()
+    start = datetime.combine(day, time.min)
+    return day, start, start + timedelta(days=1)
+
+
+@router.get("/appointments", response_model=list[ReceptionAppointmentOut])
+def day_list(
+    day: date | None = Query(None, description="Defaults to today"),
+    user: User = Depends(require_roles("receptionist")),
+    db: Session = Depends(get_db),
+):
+    receptionist = _my_receptionist(db, user)
+    expire_stale_bookings(db)
+    day, day_start, day_end = _day_bounds(day)
+
+    query = (
+        db.query(Appointment, Patient, Doctor, User)
+        .join(Patient, Patient.id == Appointment.patient_id)
+        .join(Doctor, Doctor.id == Appointment.doctor_id)
+        .join(User, User.id == Doctor.user_id)
+        .filter(
+            Appointment.clinic_id == receptionist.clinic_id,
+            Appointment.start_at >= day_start,
+            Appointment.start_at < day_end,
+            Appointment.payment_status != "pending",
+        )
+    )
+    if receptionist.doctor_id:
+        query = query.filter(Appointment.doctor_id == receptionist.doctor_id)
+
+    return [
+        ReceptionAppointmentOut(
+            id=a.id,
+            booking_reference=a.booking_reference,
+            start_at=a.start_at,
+            end_at=a.end_at,
+            status=a.status,
+            payment_status=a.payment_status,
+            remaining_amount=(
+                0
+                if a.payment_status == "fully_paid"
+                else a.consultation_fee - a.token_amount
+            ),
+            patient_name=p.full_name,
+            patient_phone=p.phone,
+            patient_age=_age(p.date_of_birth),
+            patient_gender=p.gender,
+            reason=a.reason,
+            medical_notes=a.medical_notes,
+            doctor_name=du.name,
+            specialty=d.specialty,
+        )
+        for a, p, d, du in query.order_by(Appointment.start_at).all()
+    ]
+
+
+@router.get("/dashboard", response_model=ReceptionDashboard)
+def dashboard(
+    day: date | None = Query(None, description="Defaults to today"),
+    user: User = Depends(require_roles("receptionist")),
+    db: Session = Depends(get_db),
+):
+    receptionist = _my_receptionist(db, user)
+    expire_stale_bookings(db)
+    day, day_start, day_end = _day_bounds(day)
+
+    query = db.query(Appointment).filter(
+        Appointment.clinic_id == receptionist.clinic_id,
+        Appointment.start_at >= day_start,
+        Appointment.start_at < day_end,
+        Appointment.payment_status != "pending",
+    )
+    if receptionist.doctor_id:
+        query = query.filter(Appointment.doctor_id == receptionist.doctor_id)
+    appointments = query.all()
+
+    counts = Counter(a.status for a in appointments)
+
+    money = {"token": 0, "remaining": 0}
+    ids = [a.id for a in appointments]
+    if ids:
+        rows = (
+            db.query(Payment.payment_type, func.coalesce(func.sum(Payment.amount), 0))
+            .filter(Payment.appointment_id.in_(ids), Payment.status == "success")
+            .group_by(Payment.payment_type)
+            .all()
+        )
+        for payment_type, total in rows:
+            if payment_type in money:
+                money[payment_type] = int(total)
+
+    remaining_pending = sum(
+        a.consultation_fee - a.token_amount
+        for a in appointments
+        if a.payment_status == "token_paid"
+        and a.status in ("confirmed", "arrived", "waiting", "in_consultation", "completed")
+    )
+
+    return ReceptionDashboard(
+        day=day,
+        total_appointments=len(appointments),
+        arrived=(
+            counts["arrived"]
+            + counts["waiting"]
+            + counts["in_consultation"]
+            + counts["completed"]
+        ),
+        waiting=counts["arrived"] + counts["waiting"],
+        in_consultation=counts["in_consultation"],
+        completed=counts["completed"],
+        not_arrived=counts["confirmed"],
+        no_show=counts["no_show"],
+        cancelled=counts["cancelled"],
+        token_collected=money["token"],
+        remaining_collected=money["remaining"],
+        total_received=money["token"] + money["remaining"],
+        remaining_pending=remaining_pending,
+    )
+
+
+======================================================================
+FILE: app/api/routes/reception_credits.py
+======================================================================
+from datetime import datetime
+
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy.orm import Session
+
+from app.api.deps import require_roles
+from app.core.database import get_db
+from app.models import Appointment, Doctor, Patient, Receptionist, TokenCredit, User
+from app.schemas.credit import CreditOut, RefundRequest, RefundResult
+from app.services.refund_service import refund_credit_at_desk
+
+router = APIRouter(prefix="/reception/credits", tags=["Reception"])
+
+
+@router.get("", response_model=list[CreditOut])
+def list_credits(
+    patient_id: int = Query(..., description="From the patient search"),
+    user: User = Depends(require_roles("receptionist")),
+    db: Session = Depends(get_db),
+):
+    receptionist = db.query(Receptionist).filter(Receptionist.user_id == user.id).first()
+    if not receptionist:
+        raise HTTPException(status_code=404, detail="Receptionist profile not found")
+
+    now = datetime.now()
+    rows = (
+        db.query(TokenCredit, Appointment, Patient, Doctor, User)
+        .join(Appointment, Appointment.id == TokenCredit.source_appointment_id)
+        .join(Patient, Patient.id == TokenCredit.patient_id)
+        .join(Doctor, Doctor.id == Appointment.doctor_id)
+        .join(User, User.id == Doctor.user_id)
+        .filter(
+            TokenCredit.patient_id == patient_id,
+            TokenCredit.status == "active",
+            TokenCredit.expires_at > now,
+            # Any receptionist of the clinic can see it, whichever doctor it came from
+            Appointment.clinic_id == receptionist.clinic_id,
+        )
+        .order_by(TokenCredit.expires_at)
+        .all()
+    )
+
+    return [
+        CreditOut(
+            id=c.id,
+            patient_id=p.id,
+            patient_name=p.full_name,
+            patient_phone=p.phone,
+            amount=c.amount,
+            expires_at=c.expires_at,
+            source_booking_reference=a.booking_reference,
+            source_doctor_name=du.name,
+            source_start_at=a.start_at,
+        )
+        for c, a, p, d, du in rows
+    ]
+
+
+@router.post("/{credit_id}/refund", response_model=RefundResult)
+def return_money(
+    credit_id: int,
+    data: RefundRequest,
+    user: User = Depends(require_roles("receptionist")),
+    db: Session = Depends(get_db),
+):
+    credit, refund = refund_credit_at_desk(db, user, credit_id, data.method)
+    return RefundResult(
+        credit_id=credit.id,
+        amount=credit.amount,
+        method=data.method,
+        status=credit.status,
+        transaction_reference=refund.transaction_reference,
+    )
+
+
+======================================================================
+FILE: app/api/routes/reception_patients.py
+======================================================================
+from datetime import date
+
+from fastapi import APIRouter, Depends, Query
+from pydantic import BaseModel
+from sqlalchemy import or_
+from sqlalchemy.orm import Session
+
+from app.api.deps import require_roles
+from app.core.database import get_db
+from app.models import Patient, User
+
+router = APIRouter(prefix="/reception/patients", tags=["Reception"])
+
+
+class PatientSearchOut(BaseModel):
+    id: int
+    full_name: str
+    phone: str
+    age: int | None
+    gender: str | None
+    has_account: bool  # false for walk-in patients with no login
+
+
+def _age(dob: date | None) -> int | None:
+    if not dob:
+        return None
+    today = date.today()
+    return today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
+
+
+@router.get("", response_model=list[PatientSearchOut])
+def search_patients(
+    q: str = Query(..., min_length=3, max_length=50, description="Name or mobile number"),
+    user: User = Depends(require_roles("receptionist")),
+    db: Session = Depends(get_db),
+):
+    q = q.strip()
+    # Treat % and _ as normal characters, not as wildcards
+    safe = q.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+    pattern = f"%{safe}%"
+
+    patients = (
+        db.query(Patient)
+        .filter(
+            or_(
+                Patient.full_name.ilike(pattern, escape="\\"),
+                Patient.phone.like(pattern, escape="\\"),
+            )
+        )
+        .order_by(Patient.full_name)
+        .limit(20)
+        .all()
+    )
+
+    return [
+        PatientSearchOut(
+            id=p.id,
+            full_name=p.full_name,
+            phone=p.phone,
+            age=_age(p.date_of_birth),
+            gender=p.gender,
+            has_account=p.user_id is not None,
+        )
+        for p in patients
+    ]
+
+
+======================================================================
+FILE: app/api/routes/schedule.py
+======================================================================
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+
+from app.api.deps import require_roles
+from app.core.database import get_db
+from app.models import Doctor, DoctorSchedule, User
+from app.schemas.schedule import ScheduleDay, ScheduleUpdate
+
+router = APIRouter(prefix="/doctors/me/schedule", tags=["Doctor Schedule"])
+
+
+def get_my_doctor(
+    user: User = Depends(require_roles("doctor")),
+    db: Session = Depends(get_db),
+) -> Doctor:
+    doctor = db.query(Doctor).filter(Doctor.user_id == user.id).first()
+    if not doctor:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Doctor profile not found",
+        )
+    return doctor
+
+
+@router.get("", response_model=list[ScheduleDay])
+def get_schedule(
+    doctor: Doctor = Depends(get_my_doctor),
+    db: Session = Depends(get_db),
+):
+    return (
+        db.query(DoctorSchedule)
+        .filter(DoctorSchedule.doctor_id == doctor.id)
+        .order_by(DoctorSchedule.day_of_week)
+        .all()
+    )
+
+
+@router.put("", response_model=list[ScheduleDay])
+def set_schedule(
+    data: ScheduleUpdate,
+    doctor: Doctor = Depends(get_my_doctor),
+    db: Session = Depends(get_db),
+):
+    # Replace the whole weekly schedule with what the doctor sent
+    db.query(DoctorSchedule).filter(DoctorSchedule.doctor_id == doctor.id).delete()
+    for day in data.days:
+        db.add(DoctorSchedule(doctor_id=doctor.id, **day.model_dump()))
+    db.commit()
+
+    return (
+        db.query(DoctorSchedule)
+        .filter(DoctorSchedule.doctor_id == doctor.id)
+        .order_by(DoctorSchedule.day_of_week)
+        .all()
+    )
+
+
+======================================================================
+FILE: app/api/routes/slots.py
+======================================================================
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy.orm import Session
+
+from app.api.routes.schedule import get_my_doctor
+from app.core.database import get_db
+from app.models import Doctor
+from app.services.slot_service import generate_slots
+
+router = APIRouter(prefix="/doctors/me/slots", tags=["Doctor Slots"])
+
+
+@router.post("/generate")
+def generate(
+    days_ahead: int = Query(14, ge=1, le=60),
+    doctor: Doctor = Depends(get_my_doctor),
+    db: Session = Depends(get_db),
+):
+    created = generate_slots(db, doctor, days_ahead)
+    return {"created": created, "days_ahead": days_ahead}

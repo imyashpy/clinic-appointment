@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"surface-container-highest":"#dae2fd","on-secondary-fixed":"#00201d","on-tertiary":"#ffffff","secondary-fixed":"#89f5e7","inverse-on-surface":"#eef0ff","surface-container-lowest":"#ffffff","on-error-container":"#93000a","tertiary-fixed-dim":"#4edea3","on-surface":"#131b2e","on-tertiary-container":"#bdffdb","tertiary-container":"#007d55","on-secondary-container":"#006f66","primary-fixed-dim":"#b4c5ff","on-secondary":"#ffffff","on-primary-fixed-variant":"#003ea8","surface-container":"#eaedff","error":"#ba1a1a","on-primary":"#ffffff","on-secondary-fixed-variant":"#005049","secondary-container":"#86f2e4","on-error":"#ffffff","tertiary":"#006242","surface-dim":"#d2d9f4","inverse-surface":"#283044","outline-variant":"#c3c6d7","primary":"#004ac6","surface":"#faf8ff","outline":"#737686","background":"#faf8ff","on-primary-container":"#eeefff","on-tertiary-fixed":"#002113","on-primary-fixed":"#00174b","on-surface-variant":"#434655","surface-container-high":"#e2e7ff","tertiary-fixed":"#6ffbbe","secondary-fixed-dim":"#6bd8cb","on-background":"#131b2e","inverse-primary":"#b4c5ff","primary-fixed":"#dbe1ff","surface-bright":"#faf8ff","surface-container-low":"#f2f3ff","primary-container":"#2563eb","surface-tint":"#0053db","surface-variant":"#dae2fd","error-container":"#ffdad6","secondary":"#006a61","on-tertiary-fixed-variant":"#005236"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"margin":"1rem","margin-lg":"2rem","gutter-lg":"1.5rem","gutter":"1rem","space-xl":"1.5rem","space-lg":"1rem","space-xs":"0.25rem","space-2xl":"2rem","margin-md":"1.5rem","space-md":"0.75rem","space-sm":"0.5rem"},"fontFamily":{"headline-xl":["Inter"],"headline-xl-mobile":["Inter"],"headline-lg-mobile":["Inter"],"headline-md":["Inter"],"body-lg":["Inter"],"label-md":["Inter"],"headline-sm":["Inter"],"body-sm":["Inter"],"headline-lg":["Inter"],"label-sm":["Inter"],"body-md":["Inter"],"tabular-data":["Inter"]},"fontSize":{"headline-xl":["36px",{"lineHeight":"44px","letterSpacing":"-0.025em","fontWeight":"700"}],"headline-xl-mobile":["28px",{"lineHeight":"36px","letterSpacing":"-0.02em","fontWeight":"700"}],"headline-lg-mobile":["24px",{"lineHeight":"32px","letterSpacing":"-0.015em","fontWeight":"600"}],"headline-md":["20px",{"lineHeight":"28px","letterSpacing":"-0.015em","fontWeight":"600"}],"body-lg":["16px",{"lineHeight":"24px","letterSpacing":"-0.005em","fontWeight":"400"}],"label-md":["12px",{"lineHeight":"16px","letterSpacing":"0.01em","fontWeight":"500"}],"headline-sm":["16px",{"lineHeight":"24px","letterSpacing":"-0.01em","fontWeight":"600"}],"body-sm":["13px",{"lineHeight":"18px","letterSpacing":"0em","fontWeight":"400"}],"headline-lg":["28px",{"lineHeight":"36px","letterSpacing":"-0.02em","fontWeight":"600"}],"label-sm":["11px",{"lineHeight":"14px","letterSpacing":"0.02em","fontWeight":"600"}],"body-md":["14px",{"lineHeight":"20px","letterSpacing":"0em","fontWeight":"400"}],"tabular-data":["14px",{"lineHeight":"20px","letterSpacing":"0em","fontWeight":"500"}]}}}}</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased"><header class="fixed top-0 left-0 right-0 h-16 bg-surface-container-lowest/95 backdrop-blur-xl z-50 shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 w-full px-gutter-lg flex items-center justify-between gap-space-lg"><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-sm"><img alt="CuraPulse Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7iMQxYMruXKW6mZj39AT7wu9JopASx5xxE56GPjfQ-K8hOJu8QFNljcBChTRL_TXBOUgpGmQx0s8EM5VJZWAqAjWUilK0L1F-cBfBR2bVrGwFIamKDKEWJjYuOXqTnI0supxwvUDxedgKj_cPiMjO1tH0ZOk3hPigf5kCx2CvDZxI_WgHqKo5dvtVG_6FAwiuS5pD7KEjPB9f_vTq8s7zKMwOj9k0vXFlfYzJsb6C"/><span class="font-headline-sm text-headline-sm text-primary tracking-tight font-bold">CuraPulse</span></div><div class="h-5 w-px bg-outline-variant"></div><button class="flex items-center gap-space-xs px-space-sm py-space-xs rounded bg-surface-container-low hover:bg-surface-container hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-outline text-[18px]">domain</span><span class="font-label-md text-label-md text-on-surface">Apex Health Hub, Indiranagar, Bengaluru</span><span class="material-symbols-outlined text-outline text-[16px]">unfold_more</span></button><div class="flex items-center gap-space-xs px-space-sm py-space-xs rounded-full bg-secondary-fixed/30 text-secondary"><span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span><span class="font-label-sm text-label-sm uppercase tracking-wider font-semibold">Clinic Live</span></div></div><div class="flex items-center gap-space-lg"><div class="relative flex items-center w-80 bg-surface-container-low rounded-lg px-space-md py-space-xs"><span class="material-symbols-outlined text-outline text-[18px] mr-space-xs">search</span><input class="w-full bg-transparent font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:outline-none" placeholder="Search patients, tokens, phone..." type="text"/><kbd class="px-space-xs py-0.5 rounded bg-surface-container-lowest text-on-surface-variant font-label-sm text-label-sm">⌘K</kbd></div><button aria-label="Notifications" class="relative p-space-xs rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1 right-1 w-4 h-4 rounded-full bg-error text-on-error font-label-sm text-label-sm flex items-center justify-center font-bold text-[10px]">3</span></button><div class="h-5 w-px bg-outline-variant"></div><div class="flex items-center gap-space-md"><div class="text-right hidden sm:block"><div class="font-headline-sm text-headline-sm text-on-surface">Dr. Rajesh Sharma</div><div class="font-label-sm text-label-sm text-on-surface-variant">MD Cardiologist</div></div><button class="flex items-center gap-space-xs p-0.5 rounded-full hover:bg-surface-container-low transition-colors" type="button"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD1zKdn45Kc-lfdKi9dSYCUhTDSVhjP-ZMn8mQdNCx4FLIy9TB4Q55jYc9mgMXGbqR0YP00_Heqz7EBFkoPUNJUUdH0Lqo2ycZEYeBD_fdOh60HRMOWIvjiIMpdL40p0euwPnBRNnOI_3Qzo-vFtpWQOzxILuye8clV4YTpWqUAGv2Xws4BOJqmzEPg1wCl1K9u2cQNMYH0vdMr6v8RuXwZzBqjj2-Mn6rUDTK5-cCE"/><span class="material-symbols-outlined text-outline text-[16px]">expand_more</span></button></div></div></div></header><aside class="fixed left-0 top-16 bottom-10 w-64 bg-surface-container-lowest z-40 overflow-y-auto flex flex-col py-space-lg shadow-[0_1px_8px_rgba(0,0,0,0.03)]"><nav class="flex-1 px-space-md space-y-space-lg" data-active-classes="bg-primary-container text-on-primary-container font-semibold rounded-lg"><section><div><span class="px-space-sm font-label-sm text-label-sm uppercase tracking-wider text-outline font-semibold">Main</span><div class="mt-space-xs space-y-0.5"><a class="flex items-center justify-between px-space-sm py-space-xs rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="overview" href="#"><span class="flex items-center gap-space-md"><span class="material-symbols-outlined text-[20px]">dashboard</span><span class="font-body-sm text-body-sm">Overview</span></span></a><a class="flex items-center justify-between px-space-sm py-space-xs rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="todays-schedule" href="#"><span class="flex items-center gap-space-md"><span class="material-symbols-outlined text-[20px]">schedule</span><span class="font-body-sm text-body-sm">Today's Schedule</span></span><span class="px-space-xs py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-bold">8 Waiting</span></a><a class="flex items-center justify-between px-space-sm py-space-xs rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="appointment-calendar" href="#"><span class="flex items-center gap-space-md"><span class="material-symbols-outlined text-[20px]">calendar_month</span><span class="font-body-sm text-body-sm">Appointment Calendar</span></span></a><a class="flex items-center justify-between px-space-sm py-space-xs rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="patient-management" href="#"><span class="flex items-center gap-space-md"><span class="material-symbols-outlined text-[20px]">groups</span><span class="font-body-sm text-body-sm">Patient Management</span></span></a></div></div></section><section><div><span class="px-space-sm font-label-sm text-label-sm uppercase tracking-wider text-outline font-semibold">Clinical Operations</span><div class="mt-space-xs space-y-0.5"><a aria-current="page" class="flex items-center justify-between px-space-sm py-space-xs transition-colors bg-primary-container text-on-primary-container font-semibold rounded-lg" data-path="dynamic-queue" href="#"><span class="flex items-center gap-space-md"><span class="material-symbols-outlined text-[20px]">line_style</span><span class="font-body-sm text-body-sm">Dynamic Queue</span></span><span class="px-space-xs py-0.5 rounded bg-tertiary-fixed text-on-tertiary-fixed font-label-sm text-label-sm font-bold">USP</span></a><a class="flex items-center justify-between px-space-sm py-space-xs rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="availability-and-slots" href="#"><span class="flex items-center gap-space-md"><span class="material-symbols-outlined text-[20px]">timelapse</span><span class="font-body-sm text-body-sm">Availability & Slots</span></span></a><a class="flex items-center justify-between px-space-sm py-space-xs rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="token-and-fee-settings" href="#"><span class="flex items-center gap-space-md"><span class="material-symbols-outlined text-[20px]">tune</span><span class="font-body-sm text-body-sm">Token & Fee Settings</span></span></a></div></div></section><section><div><span class="px-space-sm font-label-sm text-label-sm uppercase tracking-wider text-outline font-semibold">Finance</span><div class="mt-space-xs space-y-0.5"><a class="flex items-center justify-between px-space-sm py-space-xs rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="payments-and-earnings" href="#"><span class="flex items-center gap-space-md"><span class="material-symbols-outlined text-[20px]">payments</span><span class="font-body-sm text-body-sm">Payments & Earnings</span></span></a><a class="flex items-center justify-between px-space-sm py-space-xs rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="token-adjustments" href="#"><span class="flex items-center gap-space-md"><span class="material-symbols-outlined text-[20px]">swap_horiz</span><span class="font-body-sm text-body-sm">Token Adjustments</span></span></a></div></div></section><section><div><span class="px-space-sm font-label-sm text-label-sm uppercase tracking-wider text-outline font-semibold">Insights & Admin</span><div class="mt-space-xs space-y-0.5"><a class="flex items-center justify-between px-space-sm py-space-xs rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="reports-and-analytics" href="#"><span class="flex items-center gap-space-md"><span class="material-symbols-outlined text-[20px]">monitoring</span><span class="font-body-sm text-body-sm">Reports & Analytics</span></span></a><a class="flex items-center justify-between px-space-sm py-space-xs rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="reception-desk-view" href="#"><span class="flex items-center gap-space-md"><span class="material-symbols-outlined text-[20px]">desk</span><span class="font-body-sm text-body-sm">Reception Desk View</span></span></a><a class="flex items-center justify-between px-space-sm py-space-xs rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="super-admin-switcher" href="#"><span class="flex items-center gap-space-md"><span class="material-symbols-outlined text-[20px]">admin_panel_settings</span><span class="font-body-sm text-body-sm">Super Admin Switcher</span></span></a></div></div></section></nav></aside><div class="pl-64 pb-10"><main class="pt-16 min-h-screen bg-surface w-full px-gutter-lg py-space-lg"><div class="flex flex-col w-full">
+<!-- Top Context Header & Micro-Telemetry Ribbon -->
+<div class="flex flex-col gap-space-lg mb-space-2xl">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs mb-1">
+<span class="px-space-xs py-0.5 rounded bg-tertiary text-on-tertiary font-label-sm text-label-sm uppercase tracking-wider font-bold">Patented Core Engine</span>
+<span class="text-outline font-label-sm text-label-sm">•</span>
+<span class="text-on-surface-variant font-label-sm text-label-sm">Predictive Schedule Optimization v3.2</span>
+</div>
+<h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight">Dynamic Appointment Queue Engine</h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-3xl">Real-time autonomous dispatch bridging premature consultation completion with eager waiting-room arrivals, coupled with zero-loss token preservation.</p>
+</div>
+<!-- Live Engine Controller State -->
+<div class="flex items-center gap-space-sm bg-surface-container-lowest p-space-sm rounded-xl shadow-sm self-start lg:self-center">
+<div class="flex items-center gap-space-xs px-space-sm py-space-xs bg-tertiary/10 rounded-lg">
+<span class="w-2.5 h-2.5 rounded-full bg-tertiary animate-pulse"></span>
+<span class="font-label-sm text-label-sm text-tertiary uppercase font-bold tracking-wider">AI Dispatch Active</span>
+</div>
+<div class="h-6 w-px bg-surface-container-highest"></div>
+<div class="flex items-center gap-space-xs text-on-surface-variant px-space-xs">
+<span class="material-symbols-outlined text-[18px] text-primary">auto_mode</span>
+<span class="font-label-sm text-label-sm">Auto-Detect Buffer: <strong class="text-on-surface">≥ 10 Mins</strong></span>
+</div>
+<button class="px-space-md py-space-xs bg-primary text-on-primary font-label-sm text-label-sm rounded-lg hover:bg-primary/90 transition-colors shadow-sm flex items-center gap-space-xs" id="toggleDispatchBtn" onclick="toggleEngineState()">
+<span class="material-symbols-outlined text-[16px]">pause_circle</span>
+<span>Pause Engine</span>
+</button>
+</div>
+</div>
+<!-- Live Telemetry KPI Bento -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
+<!-- KPI 1 -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+<div class="absolute -right-4 -bottom-4 w-24 h-24 bg-primary/5 rounded-full blur-xl group-hover:bg-primary/10 transition-colors"></div>
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-semibold">Time Saved Today</span>
+<span class="p-1.5 rounded-lg bg-primary-fixed text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">timer</span>
+</span>
+</div>
+<div class="flex items-baseline gap-space-xs">
+<span class="font-headline-xl text-headline-xl text-primary font-bold">45</span>
+<span class="font-headline-sm text-headline-sm text-on-surface-variant font-medium">Mins</span>
+</div>
+<div class="mt-space-xs flex items-center gap-space-xs font-label-sm text-label-sm text-tertiary">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+<span>+18% compared to manual queuing</span>
+</div>
+</div>
+<!-- KPI 2 -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+<div class="absolute -right-4 -bottom-4 w-24 h-24 bg-tertiary/5 rounded-full blur-xl group-hover:bg-tertiary/10 transition-colors"></div>
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-semibold">Early Slots Offered</span>
+<span class="p-1.5 rounded-lg bg-tertiary-fixed text-on-tertiary-fixed flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">electric_bolt</span>
+</span>
+</div>
+<div class="flex items-baseline gap-space-xs">
+<span class="font-headline-xl text-headline-xl text-on-surface font-bold" id="earlySlotCount">4</span>
+<span class="font-label-md text-label-md text-on-surface-variant">Opportunities</span>
+</div>
+<div class="mt-space-xs flex items-center gap-space-xs font-label-sm text-label-sm text-on-surface-variant">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+<span>Last offered 12m ago to Room 2</span>
+</div>
+</div>
+<!-- KPI 3 -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+<div class="absolute -right-4 -bottom-4 w-24 h-24 bg-secondary-fixed/20 rounded-full blur-xl group-hover:bg-secondary-fixed/40 transition-colors"></div>
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-semibold">Patient Acceptance Rate</span>
+<span class="p-1.5 rounded-lg bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+</span>
+</div>
+<div class="flex items-baseline gap-space-xs">
+<span class="font-headline-xl text-headline-xl text-secondary font-bold">85%</span>
+<span class="font-label-md text-label-md text-on-surface-variant">6 of 7 accepted</span>
+</div>
+<div class="mt-space-xs flex items-center gap-space-xs font-label-sm text-label-sm text-tertiary">
+<span class="material-symbols-outlined text-[14px]">thumb_up</span>
+<span>Zero patient disputes recorded</span>
+</div>
+</div>
+<!-- KPI 4 -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+<div class="absolute -right-4 -bottom-4 w-24 h-24 bg-primary-container/10 rounded-full blur-xl"></div>
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-semibold">Doctor Idle Time Cut</span>
+<span class="p-1.5 rounded-lg bg-surface-container-high text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">speed</span>
+</span>
+</div>
+<div class="flex items-baseline gap-space-xs">
+<span class="font-headline-xl text-headline-xl text-on-surface font-bold">32%</span>
+<span class="font-label-md text-label-md text-on-surface-variant">Avg. gap: 2.1m</span>
+</div>
+<div class="mt-space-xs flex items-center gap-space-xs font-label-sm text-label-sm text-primary">
+<span class="material-symbols-outlined text-[14px]">insights</span>
+<span>Optimal consultation throughput</span>
+</div>
+</div>
+</div>
+</div>
+<!-- USP 1 SECTION: Dual-Sided Interactive Scenario Visualizer -->
+<section class="flex flex-col gap-space-lg mb-space-2xl">
+<!-- Section Header & Narrative Banner -->
+<div class="bg-surface-container-low rounded-xl p-space-lg shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md">
+<div class="w-12 h-12 rounded-xl bg-primary text-on-primary flex items-center justify-center shadow-md flex-shrink-0">
+<span class="material-symbols-outlined text-[26px]">swap_calls</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="font-label-sm text-label-sm uppercase font-bold tracking-wider text-primary">Live Scenario Simulator</span>
+<span class="px-space-xs py-0.5 rounded bg-tertiary-fixed text-on-tertiary-fixed font-label-sm text-label-sm font-semibold">Active In Chamber #2</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface">The Early-Slot Opportunity Engine</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Real-time simulation: Dr. Rajesh Sharma finishes 15 minutes ahead of schedule. Discover how the dual-sided sync keeps clinical flow seamless.</p>
+</div>
+</div>
+<div class="flex items-center gap-space-xs self-start md:self-center bg-surface-container-lowest px-space-md py-space-sm rounded-lg shadow-sm">
+<span class="material-symbols-outlined text-outline text-[18px]">sync_alt</span>
+<span class="font-body-sm text-body-sm text-on-surface font-medium">Auto-dispatch synced via WebSocket</span>
+</div>
+</div>
+<!-- Timeline Progression Strip -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm">
+<div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-space-lg">
+<!-- Event Step 1 -->
+<div class="flex items-center gap-space-md flex-1">
+<div class="w-10 h-10 rounded-full bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center font-bold font-headline-sm text-headline-sm flex-shrink-0">
+            1
+          </div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="font-headline-sm text-headline-sm text-on-surface">10:15 AM</span>
+<span class="px-space-xs py-0.2 rounded bg-tertiary-fixed text-on-tertiary-fixed font-label-sm text-label-sm font-bold">15m Early</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Dr. Sharma ends consult with <strong>Rajesh Verma</strong> (Originally booked till 10:30 AM).</span>
+</div>
+</div>
+<div class="hidden md:flex items-center text-outline-variant">
+<span class="material-symbols-outlined text-[24px]">trending_flat</span>
+</div>
+<!-- Event Step 2 -->
+<div class="flex items-center gap-space-md flex-1">
+<div class="w-10 h-10 rounded-full bg-primary-fixed text-on-primary-fixed flex items-center justify-center font-bold font-headline-sm text-headline-sm flex-shrink-0">
+            2
+          </div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface">Autonomous Calculation</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Engine scans waiting room queue for high-readiness candidates arriving early.</span>
+</div>
+</div>
+<div class="hidden md:flex items-center text-outline-variant">
+<span class="material-symbols-outlined text-[24px]">trending_flat</span>
+</div>
+<!-- Event Step 3 -->
+<div class="flex items-center gap-space-md flex-1">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest text-primary flex items-center justify-center font-bold font-headline-sm text-headline-sm flex-shrink-0">
+            3
+          </div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface">Zero-Pressure Prepone</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Instant WhatsApp/SMS ping dispatched to <strong>Priya Nair</strong> with guaranteed fallback.</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Dual Perspective Simulator Matrix (Doctor & Clinic View vs Patient Mobile View) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-stretch">
+<!-- Perspective A: Doctor & Receptionist View (7 Columns) -->
+<div class="lg:col-span-7 bg-surface-container-lowest rounded-xl p-space-xl shadow-sm flex flex-col justify-between relative overflow-hidden">
+<div class="flex flex-col gap-space-md">
+<!-- Card Header -->
+<div class="flex items-center justify-between pb-space-sm border-b-0">
+<div class="flex items-center gap-space-sm">
+<span class="p-2 rounded-lg bg-surface-container-high text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[22px]">stethoscope</span>
+</span>
+<div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-semibold">Internal Console</span>
+<h3 class="font-headline-md text-headline-md text-on-surface">Doctor & Receptionist Cockpit</h3>
+</div>
+</div>
+<span class="px-space-sm py-space-xs rounded-full bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm font-semibold flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+              Room #2 • Dr. Sharma
+            </span>
+</div>
+<!-- Early Buffer Discovery Alert Card -->
+<div class="bg-surface-container-low rounded-xl p-space-md flex items-start gap-space-md shadow-sm">
+<span class="material-symbols-outlined text-secondary text-[24px] mt-0.5">notification_important</span>
+<div class="flex flex-col flex-1">
+<div class="flex items-center justify-between">
+<span class="font-headline-sm text-headline-sm text-on-surface">Consultation Concluded 15 Mins Early</span>
+<span class="font-label-sm text-label-sm text-secondary font-bold bg-secondary-fixed/50 px-2 py-0.5 rounded">Delta: +15:00</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Vacant Slot Interval: <strong>10:15 AM — 10:30 AM IST</strong>. Current state: Chamber sanitization in progress (3 min turnaround).</p>
+</div>
+</div>
+<!-- Matched Candidate Focus Area -->
+<div class="bg-surface-bright rounded-xl p-space-md shadow-sm flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase font-bold text-outline">Autonomous Match: Best Prepone Candidate</span>
+<span class="font-label-sm text-label-sm text-tertiary bg-tertiary-fixed/30 px-space-xs py-0.5 rounded font-semibold">Readiness Score: 98%</span>
+</div>
+<div class="flex items-start justify-between gap-space-md bg-surface-container-lowest p-space-md rounded-lg shadow-sm">
+<div class="flex items-center gap-space-md">
+<img class="w-12 h-12 rounded-full object-cover" data-alt="Portrait photo of Priya Nair, an Indian woman in her early thirties with a relaxed posture in a bright clinic lobby" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCxTmvwHQzY1eRML2m75FWCzKnJg4WPVfipeMGFWfX79ynbTXRqMbvErxGiT9x2WxpIhAawocl9ZQtIC6g-Hz2XKw8mLHbq_3900N944a5j95u3iYjJkvYVf74yD5mSBzYbLXgdfY-MdNeXo8F7XwbTVddyw9tt-E4x5Xp-qgx78yEupyKjpDkg-FcYEhIbN8moVEPuXMxUZaDdmqQiLpNIP5pqZlnZN64diGFrAi1N"/>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="font-headline-sm text-headline-sm text-on-surface">Priya Nair</span>
+<span class="px-space-xs py-0.5 rounded bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">Token #A-14</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Scheduled for: <strong>10:30 AM</strong> • General Cardiac Review</span>
+<div class="flex items-center gap-space-xs mt-1 text-tertiary font-label-sm text-label-sm font-medium">
+<span class="material-symbols-outlined text-[16px]">location_on</span>
+<span>Waiting in Reception Lounge since 10:05 AM (10 min elapsed)</span>
+</div>
+</div>
+</div>
+<div class="text-right flex flex-col items-end">
+<span class="font-label-sm text-label-sm text-outline">Vitals Recorded</span>
+<span class="font-tabular-data text-tabular-data text-on-surface font-semibold">BP 120/78 • HR 72</span>
+<span class="font-label-sm text-label-sm text-tertiary mt-1 flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[14px]">check_circle</span> Ready to enter
+                </span>
+</div>
+</div>
+<!-- Prepone Decision Cockpit -->
+<div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-space-md pt-space-xs">
+<div class="flex items-center gap-space-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px] text-tertiary">lock_clock</span>
+<span class="font-body-sm text-body-sm">Patient's original slot is 100% reserved if declined.</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="px-space-md py-space-sm bg-primary text-on-primary font-headline-sm text-headline-sm rounded-lg hover:bg-primary/90 transition-all flex items-center gap-space-xs shadow-md" id="sendInviteBtn" onclick="simulatePatientInvitation()">
+<span class="material-symbols-outlined text-[18px]">forward_to_inbox</span>
+<span>Notify Next Patient to Prepone</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Receptionist Context Accordion / Fallback Info -->
+<div class="p-space-sm bg-surface-container-low rounded-lg flex items-center justify-between text-on-surface-variant font-label-md text-label-md">
+<span class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[16px] text-outline">shield</span>
+<span>Autonomous Fallback Mechanism: If no answer in 90 sec, slot defaults to walk-in triage buffer.</span>
+</span>
+<span class="font-tabular-data text-tabular-data font-semibold text-primary">Timeout: 01:28</span>
+</div>
+</div>
+<div class="mt-space-md pt-space-md flex items-center justify-between text-outline font-label-sm text-label-sm">
+<span>Dr. Rajesh Sharma Clinical Queue Stream</span>
+<span>Chamber Latency: 12ms</span>
+</div>
+</div>
+<!-- Perspective B: Patient Mobile Device Preview (5 Columns) -->
+<div class="lg:col-span-5 bg-surface-container-low rounded-xl p-space-lg shadow-sm flex flex-col items-center justify-center">
+<div class="w-full max-w-[340px] flex flex-col items-center">
+<div class="flex items-center justify-between w-full mb-space-sm px-space-xs">
+<span class="font-label-sm text-label-sm uppercase font-bold text-outline">Simulated Recipient View</span>
+<span class="font-label-sm text-label-sm text-primary font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">smartphone</span>
+              WhatsApp & App Push
+            </span>
+</div>
+<!-- Mobile Phone Chassis Graphic -->
+<div class="w-full bg-inverse-surface text-inverse-on-surface rounded-[36px] p-3 shadow-xl relative overflow-hidden">
+<!-- Speaker notch & Dynamic Island -->
+<div class="flex items-center justify-center mb-3">
+<div class="w-24 h-4 bg-on-surface/80 rounded-full flex items-center justify-end px-2">
+<div class="w-1.5 h-1.5 rounded-full bg-tertiary"></div>
+</div>
+</div>
+<!-- Phone Screen Content -->
+<div class="bg-surface rounded-[24px] p- space-md text-on-surface flex flex-col gap-space-md overflow-hidden p-3.5 shadow-inner">
+<!-- Mobile App Header Bar -->
+<div class="flex items-center justify-between pb-2 border-b-0">
+<div class="flex items-center gap-1.5">
+<div class="w-6 h-6 rounded-md bg-primary text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[14px]">local_hospital</span>
+</div>
+<span class="font-headline-sm text-headline-sm text-primary font-bold">CuraPulse Live</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-mono">10:15 AM</span>
+</div>
+<!-- Push Notification Bubble -->
+<div class="bg-surface-container-lowest rounded-xl p-3 shadow-md flex flex-col gap-2 relative">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-tertiary font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">celebration</span>
+                    Early Opportunity Available
+                  </span>
+<span class="font-label-sm text-label-sm text-outline">Just now</span>
+</div>
+<div class="flex flex-col gap-1">
+<div class="font-headline-sm text-headline-sm text-on-surface leading-tight">
+                    ✨ Good news, Priya!
+                  </div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                    Dr. Rajesh Sharma is running <strong>15 minutes early</strong> at Apex Health Hub. Would you like to enter consultation room now at <span class="text-tertiary font-bold">10:18 AM</span> instead of <span class="line-through text-outline">10:30 AM</span>?
+                  </p>
+</div>
+<!-- Live Countdown Bar -->
+<div class="w-full bg-surface-container-highest rounded-full h-1.5 overflow-hidden">
+<div class="bg-tertiary h-full rounded-full transition-all duration-1000" id="simTimerBar" style="width: 82%;"></div>
+</div>
+<div class="flex justify-between items-center text-[11px] text-on-surface-variant font-medium">
+<span>Responding promptly holds priority</span>
+<span class="font-bold text-tertiary" id="simTimerText">01:22 remaining</span>
+</div>
+<!-- Simulator Action Buttons -->
+<div class="flex flex-col gap-2 mt-1">
+<button class="w-full py-2.5 px-3 bg-tertiary text-on-tertiary rounded-lg font-headline-sm text-headline-sm hover:opacity-95 transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98]" id="acceptPreponeBtn" onclick="patientAcceptsPrepone()">
+<span class="material-symbols-outlined text-[18px]">check_circle</span>
+<span>Accept Earlier Slot (10:18 AM)</span>
+</button>
+<button class="w-full py-2 px-3 bg-surface-container-high text-on-surface-variant rounded-lg font-label-md text-label-md hover:bg-surface-container-highest transition-colors flex items-center justify-center gap-1" id="declinePreponeBtn" onclick="patientDeclinesPrepone()">
+<span>Keep Original Time (10:30 AM)</span>
+</button>
+</div>
+<!-- Guarantee Disclaimer -->
+<div class="pt-1 text-center font-label-sm text-label-sm text-outline flex items-center justify-center gap-1">
+<span class="material-symbols-outlined text-[14px]">verified_user</span>
+<span>Your original 10:30 AM appointment is guaranteed even if you decline.</span>
+</div>
+</div>
+<!-- Live Feedback Toast Inside Phone Screen -->
+<div class="hidden bg-tertiary-fixed text-on-tertiary-fixed rounded-lg p-2.5 text-center font-label-sm text-label-sm font-semibold transition-all" id="phoneToast">
+                Token #A-14 successfully advanced to 10:18 AM! Please proceed to Chamber 2.
+              </div>
+</div>
+<!-- Home indicator bar -->
+<div class="flex justify-center mt-3">
+<div class="w-32 h-1 bg-surface-container-lowest/40 rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- USP 2 SECTION: No-Show & Automated Token Transfer Management -->
+<section class="flex flex-col gap-space-lg">
+<!-- Header Block -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-md">
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs mb-1">
+<span class="px-space-xs py-0.5 rounded bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm uppercase tracking-wider font-bold">Revenue & Trust Protection</span>
+<span class="text-outline font-label-sm text-label-sm">•</span>
+<span class="text-on-surface-variant font-label-sm text-label-sm">Financial Integrity Ledger</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">No-Show & Automated Token Transfer Workflow</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Protect clinic income while building immense patient goodwill: Convert missed appointments into reusable smart credits without ledger disputes.</p>
+</div>
+<div class="flex items-center gap-space-sm">
+<button class="px-space-md py-space-sm bg-surface-container-low text-on-surface font-headline-sm text-headline-sm rounded-lg hover:bg-surface-container transition-colors flex items-center gap-space-xs shadow-sm">
+<span class="material-symbols-outlined text-[18px]">receipt_long</span>
+<span>Audit Ledger Log</span>
+</button>
+</div>
+</div>
+<!-- Active No-Show Case Card & Workflow Matrix -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+<!-- Incident Detail: Patient Vikas Malhotra (5 Columns) -->
+<div class="lg:col-span-5 bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between pb-space-sm border-b-0">
+<div class="flex items-center gap-space-xs">
+<span class="w-3 h-3 rounded-full bg-error animate-ping"></span>
+<span class="font-label-sm text-label-sm uppercase font-bold text-error">Unattended Slot Incident</span>
+</div>
+<span class="px-space-sm py-0.5 rounded bg-error-container text-on-error-container font-label-sm text-label-sm font-bold">Marked: No Show</span>
+</div>
+<div class="flex items-start gap-space-md bg-surface-container-low p-space-md rounded-xl">
+<img class="w-14 h-14 rounded-full object-cover shadow-sm" data-alt="Portrait photo of Vikas Malhotra, a middle aged Indian professional with glasses looking professional and calm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBE6gKtkOuhf-DtpkcEJX_DwkNl1E8dIp7r8HysqG4A3vHUTBZbBLRqCnndm5Nfmcybn_hlZModByK7JVOg6VvQloqegrCkh4BM7KwJWPTJwXEECFdw76hblVfr7nn4-JF7Z5X1x1ZHkBtrOXhY-3y0ztL40KaztySvKB5V1xtpi3wTrZliFWOADeCkeArG3AfxCuPTOezzQ6lEjwy6gi4h7KZK9BwBXNQjNX8MwMWB"/>
+<div class="flex flex-col flex-1">
+<div class="flex items-center justify-between">
+<h4 class="font-headline-md text-headline-md text-on-surface">Vikas Malhotra</h4>
+<span class="font-label-sm text-label-sm text-outline">Token #A-06</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">+91 98450 33129 • Cardiology Follow-up</span>
+<div class="mt-2 flex items-center gap-space-xs text-error font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[16px]">cancel</span>
+<span>Missed Slot: 09:30 AM — 09:45 AM (Grace period exceeded 20 min)</span>
+</div>
+</div>
+</div>
+<!-- Token Financial Profile -->
+<div class="grid grid-cols-2 gap-space-sm">
+<div class="bg-surface-container-low p-space-md rounded-lg flex flex-col">
+<span class="font-label-sm text-label-sm text-outline">Token Deposit Paid</span>
+<div class="flex items-baseline gap-1 mt-0.5">
+<span class="font-headline-md text-headline-md text-on-surface font-bold">₹100</span>
+<span class="font-label-sm text-label-sm text-tertiary font-semibold">Verified Online</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant mt-1">Non-refundable lock fee</span>
+</div>
+<div class="bg-secondary-fixed/20 p-space-md rounded-lg flex flex-col">
+<span class="font-label-sm text-label-sm text-secondary font-semibold">Protected Token Balance</span>
+<div class="flex items-baseline gap-1 mt-0.5">
+<span class="font-headline-md text-headline-md text-secondary font-bold">₹100.00</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-secondary-fixed mt-1">100% Intact in Escrow Vault</span>
+</div>
+</div>
+<!-- Clinic Fair Use Policy Engine -->
+<div class="p-space-md rounded-xl bg-surface-container-high flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-xs text-primary font-headline-sm text-headline-sm">
+<span class="material-symbols-outlined text-[20px]">policy</span>
+<span>CuraPulse Fair-Use Policy</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+            To respect both doctor hours and human emergencies, CuraPulse guarantees <strong>1 Free Token Transfer</strong> within <strong>7 days</strong> of a missed booking.
+          </p>
+<div class="flex items-center gap-space-md mt-space-xs text-outline font-label-sm text-label-sm">
+<span>Transfers Remaining: <strong class="text-on-surface">1 of 1</strong></span>
+<span>•</span>
+<span>Expires: <strong>7 Oct, 11:59 PM</strong></span>
+</div>
+</div>
+</div>
+<!-- Action Panel & Audit Ledger (7 Columns) -->
+<div class="lg:col-span-7 flex flex-col gap-space-md">
+<!-- Rebook Dispatcher Card -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="p-2 rounded-lg bg-tertiary-fixed text-on-tertiary-fixed flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">send_time_extension</span>
+</span>
+<div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-semibold">Action Dispatch</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">One-Click Patient Rebook Link Generator</h3>
+</div>
+</div>
+<span class="px-space-xs py-0.5 rounded bg-tertiary-fixed text-on-tertiary-fixed font-label-sm text-label-sm font-semibold">Ready to Send</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+            Generate a frictionless 1-click self-rescheduling link that automatically applies Vikas's ₹100 deposit token against his next chosen consultation slot.
+          </p>
+<!-- Mock Link Input & Copy Group -->
+<div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-space-sm bg-surface-container-low p-space-sm rounded-lg">
+<div class="flex items-center gap-space-xs flex-1 px-space-xs overflow-hidden">
+<span class="material-symbols-outlined text-outline text-[18px]">link</span>
+<span class="font-tabular-data text-tabular-data text-on-surface truncate" id="rebookUrlText">https://curapulse.health/rebook?token=TX4819-VKM-7D-SECURE</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="px-space-sm py-space-xs bg-surface-container-lowest hover:bg-surface-container text-on-surface font-label-sm text-label-sm rounded shadow-sm transition-colors flex items-center gap-1" onclick="copyRebookLink()">
+<span class="material-symbols-outlined text-[16px]">content_copy</span>
+<span id="copyBtnText">Copy Link</span>
+</button>
+<button class="px-space-md py-space-xs bg-secondary text-on-secondary font-label-sm text-label-sm rounded hover:bg-secondary/90 transition-colors shadow-sm flex items-center gap-1" onclick="sendRebookWhatsApp()">
+<span class="material-symbols-outlined text-[16px]">chat</span>
+<span>Send WhatsApp</span>
+</button>
+</div>
+</div>
+<div class="hidden p-space-sm bg-tertiary-fixed/30 rounded-lg text-tertiary font-body-sm text-body-sm flex items-center gap-space-xs" id="transferAlert">
+<span class="material-symbols-outlined text-[18px]">check_circle</span>
+<span>WhatsApp dispatch queued to +91 98450 33129. Patient rebook session unlocked.</span>
+</div>
+</div>
+<!-- Financial & Clinical Audit Ledger Trail -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-sm">
+<div class="flex items-center justify-between pb-space-xs border-b-0">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[20px]">account_balance_wallet</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Double-Entry Ledger Integrity</span>
+</div>
+<span class="font-tabular-data text-tabular-data text-outline">Ledger Reference #TX-4819</span>
+</div>
+<div class="bg-surface-container-low rounded-lg p-space-md flex flex-col gap-space-xs font-tabular-data text-tabular-data">
+<div class="flex items-center justify-between py-1 border-b-0">
+<span class="text-on-surface-variant flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-tertiary">check</span>
+                Initial Deposit Token Capture
+              </span>
+<span class="font-semibold text-on-surface">+ ₹100.00 (Gateway Razorpay)</span>
+</div>
+<div class="flex items-center justify-between py-1 border-b-0">
+<span class="text-on-surface-variant flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-error">event_busy</span>
+                Missed Slot Penalty Offset
+              </span>
+<span class="font-semibold text-on-surface-variant">₹0.00 (Protected via 7-day Grace)</span>
+</div>
+<div class="flex items-center justify-between py-1 border-b-0">
+<span class="text-on-surface-variant flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-primary">swap_horiz</span>
+                Pending Escrow Credit to Rebook
+              </span>
+<span class="font-semibold text-secondary font-bold">₹100.00 Credit Ledger</span>
+</div>
+<div class="flex items-center justify-between pt-2 text-outline font-label-sm text-label-sm">
+<span>Clinic Account Settlement Risk: <strong class="text-on-surface">₹0.00 (Zero Double-Credit)</strong></span>
+<span>Audited by Ledger Daemon at 09:51:04 AM</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Micro-Interactions Script -->
+<script>
+  let isPaused = false;
+  let countdownSeconds = 82;
+
+  function toggleEngineState() {
+    const btn = document.getElementById('toggleDispatchBtn');
+    isPaused = !isPaused;
+    if (isPaused) {
+      btn.innerHTML = `<span class="material-symbols-outlined text-[16px]">play_circle</span><span>Resume Engine</span>`;
+      btn.className = "px-space-md py-space-xs bg-tertiary text-on-tertiary font-label-sm text-label-sm rounded-lg hover:opacity-90 transition-colors shadow-sm flex items-center gap-space-xs";
+    } else {
+      btn.innerHTML = `<span class="material-symbols-outlined text-[16px]">pause_circle</span><span>Pause Engine</span>`;
+      btn.className = "px-space-md py-space-xs bg-primary text-on-primary font-label-sm text-label-sm rounded-lg hover:bg-primary/90 transition-colors shadow-sm flex items-center gap-space-xs";
+    }
+  }
+
+  function simulatePatientInvitation() {
+    const inviteBtn = document.getElementById('sendInviteBtn');
+    inviteBtn.disabled = true;
+    inviteBtn.innerHTML = `<span class="material-symbols-outlined text-[18px] animate-spin">refresh</span><span>Dispatched!</span>`;
+    setTimeout(() => {
+      inviteBtn.innerHTML = `<span class="material-symbols-outlined text-[18px]">done_all</span><span>Invite Sent via WhatsApp</span>`;
+      inviteBtn.classList.remove('bg-primary');
+      inviteBtn.classList.add('bg-tertiary', 'text-on-tertiary');
+    }, 600);
+  }
+
+  function patientAcceptsPrepone() {
+    const toast = document.getElementById('phoneToast');
+    const acceptBtn = document.getElementById('acceptPreponeBtn');
+    const declineBtn = document.getElementById('declinePreponeBtn');
+    const count = document.getElementById('earlySlotCount');
+
+    acceptBtn.classList.add('opacity-50');
+    acceptBtn.disabled = true;
+    declineBtn.classList.add('hidden');
+
+    toast.classList.remove('hidden');
+    toast.textContent = "✓ Accepted! Your slot is moved to 10:18 AM. Proceed to Chamber 2.";
+    toast.className = "bg-tertiary-fixed text-on-tertiary-fixed rounded-lg p-2.5 text-center font-label-sm text-label-sm font-semibold transition-all";
+
+    if (count) {
+      count.textContent = parseInt(count.textContent || "4", 10) + 1;
+    }
+  }
+
+  function patientDeclinesPrepone() {
+    const toast = document.getElementById('phoneToast');
+    const acceptBtn = document.getElementById('acceptPreponeBtn');
+    const declineBtn = document.getElementById('declinePreponeBtn');
+
+    acceptBtn.classList.add('hidden');
+    declineBtn.classList.add('opacity-50');
+    declineBtn.disabled = true;
+
+    toast.classList.remove('hidden');
+    toast.textContent = "Understood! Your original 10:30 AM slot is preserved.";
+    toast.className = "bg-surface-container-highest text-on-surface rounded-lg p-2.5 text-center font-label-sm text-label-sm font-semibold transition-all";
+  }
+
+  function copyRebookLink() {
+    const copyBtnText = document.getElementById('copyBtnText');
+    navigator.clipboard?.writeText("https://curapulse.health/rebook?token=TX4819-VKM-7D-SECURE");
+    copyBtnText.textContent = "Copied!";
+    setTimeout(() => {
+      copyBtnText.textContent = "Copy Link";
+    }, 2000);
+  }
+
+  function sendRebookWhatsApp() {
+    const alertBox = document.getElementById('transferAlert');
+    alertBox.classList.remove('hidden');
+  }
+
+  // Simulated countdown interval for phone preview bar
+  setInterval(() => {
+    if (!isPaused && countdownSeconds > 0) {
+      countdownSeconds--;
+      const percentage = (countdownSeconds / 100) * 100;
+      const bar = document.getElementById('simTimerBar');
+      const text = document.getElementById('simTimerText');
+      if (bar) bar.style.width = `${Math.max(5, percentage)}%`;
+      if (text) {
+        const mins = Math.floor(countdownSeconds / 60);
+        const secs = countdownSeconds % 60;
+        text.textContent = `0${mins}:${secs < 10 ? '0' : ''}${secs} remaining`;
+      }
+    }
+  }, 1000);
+</script></main></div><footer class="fixed bottom-0 left-0 right-0 h-10 bg-surface-container-lowest z-50 shadow-[0_-1px_6px_rgba(0,0,0,0.03)]"><div class="h-10 w-full px-gutter-lg flex items-center justify-between text-on-surface-variant"><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-xs"><span class="w-2 h-2 rounded-full bg-tertiary animate-pulse"></span><span class="font-label-sm text-label-sm font-medium">Socket: Connected</span></div><span class="text-outline-variant font-label-sm text-label-sm">•</span><span class="font-label-sm text-label-sm">Queue Sync: Active (Realtime Latency 14ms)</span></div><div class="flex items-center gap-space-lg"><span class="font-label-sm text-label-sm">Server Time: 10:42 AM IST</span><span class="font-label-sm text-label-sm font-semibold text-primary">CuraPulse v3.4 Cloud Node #blr-01</span></div></div></footer></body></html>

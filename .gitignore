@@ -1,0 +1,48 @@
+# Environment
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+.env.*
+.python-version
+.mypy_cache/
+.pyright/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm/
+.eslintcache
+frontend/dist/
+frontend/.vite/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Misc
+*.zip
+_all_files_combined.txt
+_api_combined.txt
+_models_combined.txt
+_routes_combined.txt
+_schemas_combined.txt
+_services_combined.txt
+project_reference_summary.txt

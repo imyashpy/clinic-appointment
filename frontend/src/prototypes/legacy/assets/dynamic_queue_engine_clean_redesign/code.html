@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CuraPulse - Dynamic Queue &amp; Token Recovery Engine</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+            },
+            slate: {
+              850: '#152033',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    body { font-family: 'Inter', sans-serif; background-color: #F8FAFC; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 antialiased min-h-screen flex flex-col">
+<!-- Top Global Navbar -->
+<header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2.5">
+<div class="w-9 h-9 rounded-xl bg-brand-600 flex items-center justify-center text-white shadow-sm shadow-brand-500/20">
+<span class="material-symbols-outlined text-[20px]">vital_signs</span>
+</div>
+<div>
+<div class="font-bold text-slate-900 text-lg leading-none tracking-tight">CuraPulse</div>
+<span class="text-[11px] text-slate-500 font-medium tracking-wide">CLINICAL OPERATING SYSTEM</span>
+</div>
+</div>
+<div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 text-xs font-medium border border-slate-200">
+<span class="material-symbols-outlined text-[16px] text-slate-500">domain</span>
+<span>Apex Health Hub • Indiranagar, Bengaluru</span>
+<span class="material-symbols-outlined text-[16px] text-slate-400">arrow_drop_down</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold border border-emerald-200/80">
+<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          Autonomous Dispatch Online
+        </div>
+<div class="h-5 w-px bg-slate-200 hidden sm:block"></div>
+<div class="flex items-center gap-3">
+<img alt="Dr. Rajesh Sharma" class="w-8 h-8 rounded-full object-cover ring-2 ring-slate-100" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD1zKdn45Kc-lfdKi9dSYCUhTDSVhjP-ZMn8mQdNCx4FLIy9TB4Q55jYc9mgMXGbqR0YP00_Heqz7EBFkoPUNJUUdH0Lqo2ycZEYeBD_fdOh60HRMOWIvjiIMpdL40p0euwPnBRNnOI_3Qzo-vFtpWQOzxILuye8clV4YTpWqUAGv2Xws4BOJqmzEPg1wCl1K9u2cQNMYH0vdMr6v8RuXwZzBqjj2-Mn6rUDTK5-cCE"/>
+<div class="hidden sm:block text-left">
+<div class="text-xs font-bold text-slate-800 leading-tight">Dr. Rajesh Sharma</div>
+<div class="text-[11px] text-slate-500">Chief of Cardiology</div>
+</div>
+</div>
+</div>
+</div>
+</header>
+<!-- Sub-Header / Quick Navigation Ribbon -->
+<div class="bg-white border-b border-slate-200 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-4">
+<div class="flex items-center gap-3">
+<span class="px-2.5 py-1 rounded-md bg-blue-50 text-brand-700 text-xs font-semibold border border-blue-100 uppercase tracking-wider">Platform USP Engine</span>
+<h1 class="text-xl font-bold text-slate-900 tracking-tight">Dynamic Queue &amp; Zero-Loss Token Recovery</h1>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-xs text-slate-500 font-medium">Auto-dispatch buffer: <span class="text-slate-800 font-semibold">≥10 mins</span></span>
+<div class="h-4 w-px bg-slate-200 mx-1"></div>
+<button class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-sm" id="pauseEngineBtn" onclick="toggleEngineState()">
+<span class="material-symbols-outlined text-[16px] text-slate-500">pause_circle</span>
+<span id="pauseBtnLabel">Pause Engine</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Main Content Canvas -->
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10 flex-1 w-full">
+<!-- TOP KPI ROW: Clean, Minimalist SaaS Cards -->
+<section>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+<!-- Card 1 -->
+<div class="bg-white rounded-xl border border-slate-200/90 p-5 shadow-sm hover:shadow-md transition-shadow">
+<div class="flex items-center justify-between mb-3">
+<span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Time Saved Today</span>
+<div class="w-8 h-8 rounded-lg bg-blue-50 text-brand-600 flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">timer</span>
+</div>
+</div>
+<div class="flex items-baseline gap-1.5">
+<span class="text-3xl font-extrabold text-slate-900 tracking-tight">45</span>
+<span class="text-sm font-semibold text-slate-500">Mins</span>
+</div>
+<div class="mt-2.5 flex items-center gap-1 text-xs text-emerald-600 font-medium">
+<span class="material-symbols-outlined text-[15px]">trending_up</span>
+<span>+18% efficiency over static queues</span>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-white rounded-xl border border-slate-200/90 p-5 shadow-sm hover:shadow-md transition-shadow">
+<div class="flex items-center justify-between mb-3">
+<span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Early Slots Offered</span>
+<div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">bolt</span>
+</div>
+</div>
+<div class="flex items-baseline gap-1.5">
+<span class="text-3xl font-extrabold text-slate-900 tracking-tight" id="kpiEarlyCount">4</span>
+<span class="text-sm font-semibold text-slate-500">Opportunities</span>
+</div>
+<div class="mt-2.5 flex items-center gap-1.5 text-xs text-slate-500">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+<span>1 active prepone opportunity right now</span>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-white rounded-xl border border-slate-200/90 p-5 shadow-sm hover:shadow-md transition-shadow">
+<div class="flex items-center justify-between mb-3">
+<span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Patient Acceptance Rate</span>
+<div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">thumb_up</span>
+</div>
+</div>
+<div class="flex items-baseline gap-1.5">
+<span class="text-3xl font-extrabold text-slate-900 tracking-tight">85%</span>
+<span class="text-xs font-medium text-slate-500">(6 of 7 accepted)</span>
+</div>
+<div class="mt-2.5 flex items-center gap-1 text-xs text-emerald-600 font-medium">
+<span class="material-symbols-outlined text-[15px]">verified</span>
+<span>Zero patient complaints or friction</span>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="bg-white rounded-xl border border-slate-200/90 p-5 shadow-sm hover:shadow-md transition-shadow">
+<div class="flex items-center justify-between mb-3">
+<span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Doctor Idle Time Reduced</span>
+<div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">hourglass_empty</span>
+</div>
+</div>
+<div class="flex items-baseline gap-1.5">
+<span class="text-3xl font-extrabold text-slate-900 tracking-tight">32%</span>
+<span class="text-sm font-semibold text-slate-500">Average</span>
+</div>
+<div class="mt-2.5 flex items-center gap-1 text-xs text-indigo-600 font-medium">
+<span class="material-symbols-outlined text-[15px]">speed</span>
+<span>Avg chamber turnaround: 2.1 mins</span>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 1: The Early-Slot Opportunity Engine -->
+<section class="space-y-6">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-4">
+<div>
+<div class="flex items-center gap-2">
+<span class="text-xs font-bold uppercase tracking-wider text-brand-600">Feature Spotlight 01</span>
+<span class="text-slate-300">•</span>
+<span class="text-xs font-medium text-slate-500">Autonomous Schedule Rebalancing</span>
+</div>
+<h2 class="text-lg font-bold text-slate-900 tracking-tight mt-0.5">The Early-Slot Opportunity Engine</h2>
+</div>
+<p class="text-xs text-slate-500 max-w-md">Bridging doctor consultation completions with waiting room arrivals in real-time without double booking or schedule stress.</p>
+</div>
+<!-- 3-Step Clean Workflow Diagram -->
+<div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
+<!-- Step 1 -->
+<div class="flex items-start gap-4">
+<div class="w-9 h-9 rounded-full bg-blue-50 border border-blue-200 text-brand-600 font-bold text-sm flex items-center justify-center shrink-0">1</div>
+<div>
+<div class="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                Consultation Wraps Early
+                <span class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-blue-100 text-brand-700">10:15 AM</span>
+</div>
+<p class="text-xs text-slate-500 mt-1 leading-relaxed">Dr. Sharma concludes 15m early with Rajesh Verma. Chamber sanitization initiated automatically.</p>
+</div>
+</div>
+<!-- Step 2 -->
+<div class="flex items-start gap-4 md:border-l md:border-slate-100 md:pl-6">
+<div class="w-9 h-9 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 font-bold text-sm flex items-center justify-center shrink-0">2</div>
+<div>
+<div class="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                Engine Detects Readiness
+                <span class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-700">Match 98%</span>
+</div>
+<p class="text-xs text-slate-500 mt-1 leading-relaxed">Algorithm identifies Priya Nair (Token #A-14) already in lounge with vitals recorded.</p>
+</div>
+</div>
+<!-- Step 3 -->
+<div class="flex items-start gap-4 md:border-l md:border-slate-100 md:pl-6">
+<div class="w-9 h-9 rounded-full bg-purple-50 border border-purple-200 text-purple-600 font-bold text-sm flex items-center justify-center shrink-0">3</div>
+<div>
+<div class="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                Zero-Pressure Patient Ping
+                <span class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-purple-100 text-purple-700">Guaranteed</span>
+</div>
+<p class="text-xs text-slate-500 mt-1 leading-relaxed">WhatsApp/Push invite dispatched. If declined or timed out, original 10:30 AM slot remains 100% held.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Side-by-Side Interactive Simulation -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+<!-- Doctor / Clinic Cockpit (7 Columns) -->
+<div class="lg:col-span-7 bg-white rounded-xl border border-slate-200 p-6 shadow-sm flex flex-col justify-between">
+<div class="space-y-5">
+<!-- Cockpit Header -->
+<div class="flex items-center justify-between pb-3 border-b border-slate-100">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-slate-600 text-[20px]">monitor_heart</span>
+<span class="text-sm font-bold text-slate-800">Doctor / Receptionist Cockpit</span>
+</div>
+<span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">Room 02 • Active</span>
+</div>
+<!-- Early Buffer Discovery Alert Card -->
+<div class="bg-blue-50/70 border border-blue-200 rounded-xl p-4">
+<div class="flex items-start gap-3">
+<div class="w-8 h-8 rounded-lg bg-brand-600 text-white flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[18px]">access_time</span>
+</div>
+<div class="flex-1">
+<div class="flex items-center justify-between">
+<span class="text-xs font-bold uppercase tracking-wider text-brand-700">Buffer Detected</span>
+<span class="text-xs font-semibold text-brand-700 bg-blue-100 px-2 py-0.5 rounded">+15 Mins Early</span>
+</div>
+<div class="text-sm font-semibold text-slate-900 mt-0.5">
+                    Dr. Sharma finished 15m early with Rajesh Verma.
+                  </div>
+<p class="text-xs text-slate-600 mt-0.5">
+                    Vacant slot interval: <span class="font-medium text-slate-800">10:15 AM – 10:30 AM</span>. Sanitization turnaround underway.
+                  </p>
+</div>
+</div>
+</div>
+<!-- Best Candidate Card -->
+<div class="border border-slate-200 rounded-xl p-4 bg-slate-50/60">
+<div class="flex items-center justify-between mb-3">
+<span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Top Match: Ready for Prepone</span>
+<span class="text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                  Readiness Score: 98%
+                </span>
+</div>
+<div class="flex items-center justify-between gap-4 bg-white p-3.5 rounded-lg border border-slate-200">
+<div class="flex items-center gap-3">
+<img alt="Priya Nair" class="w-11 h-11 rounded-full object-cover ring-2 ring-slate-100" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCxTmvwHQzY1eRML2m75FWCzKnJg4WPVfipeMGFWfX79ynbTXRqMbvErxGiT9x2WxpIhAawocl9ZQtIC6g-Hz2XKw8mLHbq_3900N944a5j95u3iYjJkvYVf74yD5mSBzYbLXgdfY-MdNeXo8F7XwbTVddyw9tt-E4x5Xp-qgx78yEupyKjpDkg-FcYEhIbN8moVEPuXMxUZaDdmqQiLpNIP5pqZlnZN64diGFrAi1N"/>
+<div>
+<div class="flex items-center gap-2">
+<span class="text-sm font-bold text-slate-900">Priya Nair</span>
+<span class="text-xs font-semibold px-2 py-0.5 bg-slate-100 text-slate-700 rounded border border-slate-200">Token #A-14</span>
+</div>
+<div class="text-xs text-slate-500 mt-0.5">
+                      Scheduled: <span class="font-medium text-slate-700">10:30 AM</span> • In Waiting Lounge since 10:05 AM
+                    </div>
+</div>
+</div>
+<div class="text-right">
+<span class="text-[11px] text-slate-400 font-medium block">Vitals Checked</span>
+<span class="text-xs font-semibold text-slate-700">BP 120/78 • HR 72</span>
+</div>
+</div>
+<div class="mt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-1">
+<div class="flex items-center gap-1.5 text-xs text-slate-500">
+<span class="material-symbols-outlined text-[16px] text-slate-400">shield_lock</span>
+<span>10:30 AM original booking remains 100% held</span>
+</div>
+<button class="w-full sm:w-auto px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-all shadow-sm" id="dispatchNotifyBtn" onclick="triggerNotifyPatient()">
+<span class="material-symbols-outlined text-[16px]">outgoing_mail</span>
+<span id="dispatchBtnText">Notify Patient to Prepone</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Safe Fallback Status -->
+<div class="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px] text-slate-400">info</span>
+              No response within 90s releases slot to immediate walk-in triage buffer.
+            </span>
+<span class="font-mono text-slate-400">Timeout: 01:22</span>
+</div>
+</div>
+<!-- Mobile Patient Experience Mockup (5 Columns) -->
+<div class="lg:col-span-5 bg-white rounded-xl border border-slate-200 p-6 shadow-sm flex flex-col items-center justify-center">
+<div class="w-full max-w-[320px]">
+<div class="flex items-center justify-between mb-3 text-xs text-slate-500 font-medium">
+<span>Patient Device Preview</span>
+<span class="flex items-center gap-1 text-brand-600 font-semibold">
+<span class="material-symbols-outlined text-[14px]">notifications_active</span>
+                WhatsApp / App Alert
+              </span>
+</div>
+<!-- Phone Shell -->
+<div class="w-full bg-slate-900 rounded-[32px] p-3 shadow-xl border-4 border-slate-800">
+<!-- Top Notch -->
+<div class="flex justify-center mb-2">
+<div class="w-20 h-3.5 bg-slate-800 rounded-full flex items-center justify-end px-2">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+</div>
+</div>
+<!-- Phone Screen -->
+<div class="bg-slate-50 rounded-[22px] p-3.5 text-slate-900 space-y-3 min-h-[380px] flex flex-col justify-between">
+<div>
+<!-- Header -->
+<div class="flex items-center justify-between pb-2 border-b border-slate-200 text-xs">
+<span class="font-bold text-brand-600 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">local_hospital</span>
+                      CuraPulse
+                    </span>
+<span class="text-slate-400 text-[11px] font-mono">10:15 AM</span>
+</div>
+<!-- Notification Content Box -->
+<div class="mt-3 bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm space-y-2.5">
+<div class="flex items-center justify-between">
+<span class="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">Earlier Slot Available</span>
+<span class="text-[10px] text-slate-400">Just now</span>
+</div>
+<div class="text-xs font-semibold text-slate-900 leading-snug">
+                      Dr. Sharma is ready earlier than expected!
+                    </div>
+<p class="text-[11px] text-slate-600 leading-relaxed">
+                      Move your consult to <strong class="text-slate-900">10:18 AM</strong> or keep your original <span class="text-slate-500 line-through">10:30 AM</span> appointment.
+                    </p>
+<!-- Countdown Bar -->
+<div class="space-y-1 pt-1">
+<div class="w-full bg-slate-100 rounded-full h-1 overflow-hidden">
+<div class="bg-emerald-500 h-full w-4/5 rounded-full transition-all duration-1000" id="simBar"></div>
+</div>
+<div class="flex justify-between text-[10px] text-slate-400">
+<span>Original slot guaranteed</span>
+<span class="font-medium text-emerald-600" id="simBarText">01:18 remaining</span>
+</div>
+</div>
+<!-- Interactive Action Buttons -->
+<div class="space-y-1.5 pt-2">
+<button class="w-full py-2 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-1 active:scale-[0.98]" id="patientAcceptBtn" onclick="patientAccepts()">
+<span class="material-symbols-outlined text-[16px]">check</span>
+                        Accept 10:18 AM
+                      </button>
+<button class="w-full py-1.5 px-3 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium transition-colors" id="patientKeepBtn" onclick="patientDeclines()">
+                        Keep 10:30 AM
+                      </button>
+</div>
+<!-- Dynamic State Toast -->
+<div class="hidden text-center p-2 rounded-lg text-xs font-semibold" id="patientFeedback"></div>
+</div>
+</div>
+<!-- Privacy Guarantee Footer inside phone -->
+<div class="text-center text-[10px] text-slate-400 flex items-center justify-center gap-1">
+<span class="material-symbols-outlined text-[12px]">verified_user</span>
+                  No cancellation penalties apply.
+                </div>
+</div>
+<!-- Home Bar -->
+<div class="w-24 h-1 bg-slate-700 rounded-full mx-auto mt-2"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 2: No-Show & Fair-Token Transfer Workflow -->
+<section class="space-y-6">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-4">
+<div>
+<div class="flex items-center gap-2">
+<span class="text-xs font-bold uppercase tracking-wider text-emerald-600">Feature Spotlight 02</span>
+<span class="text-slate-300">•</span>
+<span class="text-xs font-medium text-slate-500">Revenue &amp; Goodwill Protection</span>
+</div>
+<h2 class="text-lg font-bold text-slate-900 tracking-tight mt-0.5">No-Show &amp; Fair-Token Transfer Workflow</h2>
+</div>
+<p class="text-xs text-slate-500 max-w-md">Eliminate patient disputes when appointments are missed while safeguarding clinic revenue with double-entry integrity.</p>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+<!-- Left: Zero-Loss Protection Policy Card (5 Columns) -->
+<div class="lg:col-span-5 bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-5">
+<div class="flex items-center justify-between pb-3 border-b border-slate-100">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-emerald-600 text-[20px]">verified_user</span>
+<span class="text-sm font-bold text-slate-900">Zero-Loss Protection Policy</span>
+</div>
+<span class="text-xs font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">Active Policy</span>
+</div>
+<!-- Unattended Slot Alert -->
+<div class="p-3.5 rounded-lg bg-amber-50 border border-amber-200 flex items-start gap-3">
+<span class="material-symbols-outlined text-amber-600 text-[20px] mt-0.5">event_busy</span>
+<div>
+<div class="text-xs font-bold text-amber-800 uppercase tracking-wider">Unattended Slot Recorded</div>
+<div class="text-xs text-slate-700 mt-0.5">
+<span class="font-semibold">Vikas Malhotra</span> (Token #A-06) missed 09:30 AM consult. Grace period expired.
+              </div>
+</div>
+</div>
+<!-- Policy Explanation -->
+<div class="space-y-3">
+<h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Automatic Credit Conversion</h4>
+<div class="p-3.5 bg-slate-50 rounded-lg border border-slate-200 space-y-2 text-xs text-slate-600">
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-[16px] text-emerald-600 shrink-0 mt-0.5">check_circle</span>
+<span>The ₹100 deposit token is instantly converted to a <strong>7-day rebooking credit</strong>.</span>
+</div>
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-[16px] text-emerald-600 shrink-0 mt-0.5">check_circle</span>
+<span>Patient receives an automated WhatsApp link to self-reschedule with zero extra fee.</span>
+</div>
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-[16px] text-emerald-600 shrink-0 mt-0.5">check_circle</span>
+<span>No clinic revenue loss; no friction or chargeback disputes.</span>
+</div>
+</div>
+</div>
+<!-- Rebook Link Generator -->
+<div class="pt-2 space-y-2">
+<span class="text-xs font-semibold text-slate-700">1-Click Rebooking Link</span>
+<div class="flex items-center gap-2 bg-slate-100 p-2 rounded-lg border border-slate-200 text-xs">
+<span class="material-symbols-outlined text-slate-400 text-[16px]">link</span>
+<span class="text-slate-600 truncate flex-1 font-mono text-[11px]" id="rebookUrl">curapulse.health/rebook?token=TX4819-VKM</span>
+<button class="px-2.5 py-1 bg-white hover:bg-slate-50 border border-slate-200 rounded text-slate-700 font-semibold shadow-xs transition-colors shrink-0" onclick="copyRebook()">
+<span id="copyLabel">Copy</span>
+</button>
+</div>
+</div>
+<div class="pt-2 flex items-center justify-between text-xs text-slate-500">
+<span>Transfers Remaining: <strong class="text-slate-800">1 of 1</strong></span>
+<span>Expires: <strong class="text-slate-800">7 Oct, 11:59 PM</strong></span>
+</div>
+</div>
+<!-- Right: Itemized Double-Entry Ledger Card (7 Columns) -->
+<div class="lg:col-span-7 bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-5">
+<div class="flex items-center justify-between pb-3 border-b border-slate-100">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-700 text-[20px]">account_balance</span>
+<span class="text-sm font-bold text-slate-900">Itemized Double-Entry Ledger</span>
+</div>
+<span class="text-xs font-mono text-slate-500">Ref: #TX-4819-VKM</span>
+</div>
+<!-- Financial Snapshot Banner -->
+<div class="grid grid-cols-2 gap-4">
+<div class="p-3.5 rounded-lg bg-slate-50 border border-slate-200">
+<span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">Token Deposit Captured</span>
+<div class="text-xl font-bold text-slate-900 mt-1">₹100.00</div>
+<span class="text-[11px] text-emerald-600 font-medium">Razorpay Gateway #pay_Nx91k2</span>
+</div>
+<div class="p-3.5 rounded-lg bg-emerald-50/70 border border-emerald-200">
+<span class="text-[11px] font-semibold text-emerald-700 uppercase tracking-wider block">Escrow Rebook Balance</span>
+<div class="text-xl font-bold text-emerald-700 mt-1">₹100.00</div>
+<span class="text-[11px] text-emerald-600 font-medium">100% Protected (0 Disputes)</span>
+</div>
+</div>
+<!-- Itemized Ledger Table -->
+<div class="border border-slate-200 rounded-lg overflow-hidden">
+<table class="w-full text-left text-xs">
+<thead class="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold">
+<tr>
+<th class="py-2.5 px-3">Transaction Description</th>
+<th class="py-2.5 px-3">Debit (₹)</th>
+<th class="py-2.5 px-3">Credit (₹)</th>
+<th class="py-2.5 px-3 text-right">Balance (₹)</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 text-slate-700">
+<tr>
+<td class="py-2.5 px-3">
+<div class="font-medium text-slate-900">Initial Token Lock Fee</div>
+<div class="text-[10px] text-slate-400">Captured at booking • 09:00 AM</div>
+</td>
+<td class="py-2.5 px-3 text-slate-400">—</td>
+<td class="py-2.5 px-3 text-emerald-600 font-semibold">+ 100.00</td>
+<td class="py-2.5 px-3 font-mono font-medium text-right">100.00</td>
+</tr>
+<tr>
+<td class="py-2.5 px-3">
+<div class="font-medium text-slate-900">Unattended Slot Grace Offset</div>
+<div class="text-[10px] text-slate-400">Fair-use guarantee applied • 09:50 AM</div>
+</td>
+<td class="py-2.5 px-3 text-slate-400">0.00</td>
+<td class="py-2.5 px-3 text-slate-400">—</td>
+<td class="py-2.5 px-3 font-mono font-medium text-right">100.00</td>
+</tr>
+<tr class="bg-blue-50/40">
+<td class="py-2.5 px-3">
+<div class="font-medium text-brand-700">Escrow Rebooking Voucher Created</div>
+<div class="text-[10px] text-slate-400">Valid through Oct 7, 2025</div>
+</td>
+<td class="py-2.5 px-3 text-brand-700 font-semibold">100.00 (Locked)</td>
+<td class="py-2.5 px-3 text-slate-400">—</td>
+<td class="py-2.5 px-3 font-mono font-bold text-emerald-700 text-right">100.00 Cr</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Ledger Audit Verification Footer -->
+<div class="p-3 bg-slate-50 rounded-lg flex items-center justify-between text-xs text-slate-500 border border-slate-200">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-emerald-600">verified</span>
+<span>Audit Status: <strong>Zero Double-Credit Exposure</strong></span>
+</div>
+<span class="text-[11px] font-mono text-slate-400">Ledger Daemon Hash: #7f3a..88c</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Clean Minimal Footer -->
+<footer class="bg-white border-t border-slate-200 py-3 mt-12">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+<span>WebSocket Channel Connected • Latency: 12ms</span>
+</div>
+<div>
+<span>CuraPulse Engine v3.4 • Cloud Node Bengaluru</span>
+</div>
+</div>
+</footer>
+<!-- Micro-Interactions Script -->
+<script>
+    let enginePaused = false;
+    let simCountdown = 78;
+
+    function toggleEngineState() {
+      enginePaused = !enginePaused;
+      const btn = document.getElementById('pauseEngineBtn');
+      const label = document.getElementById('pauseBtnLabel');
+      if (enginePaused) {
+        label.textContent = "Resume Engine";
+        btn.classList.add('bg-amber-50', 'border-amber-200', 'text-amber-700');
+        btn.classList.remove('bg-white', 'text-slate-700');
+      } else {
+        label.textContent = "Pause Engine";
+        btn.classList.remove('bg-amber-50', 'border-amber-200', 'text-amber-700');
+        btn.classList.add('bg-white', 'text-slate-700');
+      }
+    }
+
+    function triggerNotifyPatient() {
+      const btn = document.getElementById('dispatchNotifyBtn');
+      const txt = document.getElementById('dispatchBtnText');
+      btn.disabled = true;
+      txt.textContent = "Dispatching...";
+      setTimeout(() => {
+        txt.textContent = "WhatsApp Sent to Priya";
+        btn.classList.remove('bg-brand-600', 'hover:bg-brand-700');
+        btn.classList.add('bg-emerald-600', 'hover:bg-emerald-700');
+      }, 500);
+    }
+
+    function patientAccepts() {
+      const fb = document.getElementById('patientFeedback');
+      const acceptBtn = document.getElementById('patientAcceptBtn');
+      const keepBtn = document.getElementById('patientKeepBtn');
+      const kpiCount = document.getElementById('kpiEarlyCount');
+
+      acceptBtn.disabled = true;
+      acceptBtn.classList.add('opacity-50');
+      keepBtn.classList.add('hidden');
+
+      fb.classList.remove('hidden');
+      fb.className = "text-center p-2 rounded-lg text-xs font-semibold bg-emerald-100 text-emerald-800";
+      fb.textContent = "✓ Accepted! Moved to 10:18 AM. Proceed to Room 02.";
+
+      if (kpiCount) {
+        kpiCount.textContent = parseInt(kpiCount.textContent || "4", 10) + 1;
+      }
+    }
+
+    function patientDeclines() {
+      const fb = document.getElementById('patientFeedback');
+      const acceptBtn = document.getElementById('patientAcceptBtn');
+      const keepBtn = document.getElementById('patientKeepBtn');
+
+      acceptBtn.classList.add('hidden');
+      keepBtn.disabled = true;
+      keepBtn.classList.add('opacity-50');
+
+      fb.classList.remove('hidden');
+      fb.className = "text-center p-2 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700";
+      fb.textContent = "Understood. Your 10:30 AM slot is preserved.";
+    }
+
+    function copyRebook() {
+      const copyLabel = document.getElementById('copyLabel');
+      navigator.clipboard?.writeText("https://curapulse.health/rebook?token=TX4819-VKM");
+      copyLabel.textContent = "Copied!";
+      setTimeout(() => {
+        copyLabel.textContent = "Copy";
+      }, 2000);
+    }
+
+    // Countdown animation in phone preview
+    setInterval(() => {
+      if (!enginePaused && simCountdown > 0) {
+        simCountdown--;
+        const percentage = (simCountdown / 90) * 100;
+        const bar = document.getElementById('simBar');
+        const barText = document.getElementById('simBarText');
+        if (bar) bar.style.width = Math.max(5, percentage) + '%';
+        if (barText) {
+          const m = Math.floor(simCountdown / 60);
+          const s = simCountdown % 60;
+          barText.textContent = `0${m}:${s < 10 ? '0' : ''}${s} remaining`;
+        }
+      }
+    }, 1000);
+  </script>
+</body></html>

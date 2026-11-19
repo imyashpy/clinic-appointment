@@ -1,0 +1,1133 @@
+COMBINED SERVICE SOURCE
+Generated from app/services/*.py. Each section contains the full source of the named file.
+
+
+======================================================================
+FILE: app/services/appointment_actions.py
+======================================================================
+from datetime import datetime
+
+from fastapi import HTTPException
+from sqlalchemy.orm import Session
+
+from app.models import (
+    Appointment,
+    AppointmentHistory,
+    Doctor,
+    PatientVisit,
+    Receptionist,
+    User,
+)
+
+
+def _can_manage(db: Session, user: User, appointment: Appointment) -> bool:
+    if user.role == "doctor":
+        doctor = db.query(Doctor).filter(Doctor.user_id == user.id).first()
+        return doctor is not None and doctor.id == appointment.doctor_id
+    if user.role == "receptionist":
+        rec = db.query(Receptionist).filter(Receptionist.user_id == user.id).first()
+        return (
+            rec is not None
+            and rec.clinic_id == appointment.clinic_id
+            and (rec.doctor_id is None or rec.doctor_id == appointment.doctor_id)
+        )
+    return False
+
+
+def _get_locked(db: Session, user: User, appointment_id: int) -> Appointment:
+    appointment = (
+        db.query(Appointment)
+        .filter(Appointment.id == appointment_id)
+        .with_for_update()
+        .first()
+    )
+    # Same answer whether it does not exist or belongs to someone else
+    if not appointment or not _can_manage(db, user, appointment):
+        raise HTTPException(status_code=404, detail="Appointment not found")
+    return appointment
+
+
+def _move(db: Session, appointment: Appointment, user: User, new_status: str, note: str):
+    db.add(
+        AppointmentHistory(
+            appointment_id=appointment.id,
+            changed_by_user_id=user.id,
+            old_status=appointment.status,
+            new_status=new_status,
+            note=note,
+        )
+    )
+    appointment.status = new_status
+
+
+def check_in(db: Session, user: User, appointment_id: int) -> Appointment:
+    appointment = _get_locked(db, user, appointment_id)
+    if appointment.status != "confirmed":
+        raise HTTPException(
+            status_code=409,
+            detail="Cannot check in: appointment is " + appointment.status,
+        )
+    if appointment.start_at.date() != datetime.now().date():
+        raise HTTPException(
+            status_code=409,
+            detail="Check-in is only possible on the day of the appointment",
+        )
+    appointment.checked_in_at = datetime.now()
+    _move(db, appointment, user, "arrived", "Patient checked in")
+    db.commit()
+    return appointment
+
+
+def start_consultation(db: Session, user: User, appointment_id: int) -> Appointment:
+    appointment = _get_locked(db, user, appointment_id)
+    if appointment.status not in ("arrived", "waiting"):
+        raise HTTPException(
+            status_code=409,
+            detail="Cannot start: appointment is " + appointment.status,
+        )
+    visit = (
+        db.query(PatientVisit)
+        .filter(PatientVisit.appointment_id == appointment.id)
+        .first()
+    )
+    if not visit:
+        db.add(PatientVisit(appointment_id=appointment.id, started_at=datetime.now()))
+    _move(db, appointment, user, "in_consultation", "Consultation started")
+    db.commit()
+    return appointment
+
+
+def complete_consultation(db: Session, user: User, appointment_id: int) -> Appointment:
+    appointment = _get_locked(db, user, appointment_id)
+    if appointment.status != "in_consultation":
+        raise HTTPException(
+            status_code=409,
+            detail="Cannot complete: appointment is " + appointment.status,
+        )
+    visit = (
+        db.query(PatientVisit)
+        .filter(PatientVisit.appointment_id == appointment.id)
+        .first()
+    )
+    if not visit:
+        visit = PatientVisit(appointment_id=appointment.id)
+        db.add(visit)
+    visit.ended_at = datetime.now()
+    _move(db, appointment, user, "completed", "Consultation completed")
+    db.commit()
+    return appointment
+
+
+def mark_no_show(db: Session, user: User, appointment_id: int) -> Appointment:
+    appointment = _get_locked(db, user, appointment_id)
+    if appointment.status != "confirmed":
+        raise HTTPException(
+            status_code=409,
+            detail="Cannot mark no-show: appointment is " + appointment.status,
+        )
+    if datetime.now() < appointment.start_at:
+        raise HTTPException(
+            status_code=409,
+            detail="Cannot mark no-show before the appointment time",
+        )
+    _move(db, appointment, user, "no_show", "Marked no-show, token forfeited per policy")
+    db.commit()
+    return appointment
+
+
+======================================================================
+FILE: app/services/booking_service.py
+======================================================================
+import secrets
+import uuid
+from datetime import datetime, timedelta
+
+from fastapi import HTTPException
+from sqlalchemy import and_, or_
+from sqlalchemy.orm import Session
+
+from app.models import (
+    Appointment,
+    AppointmentHistory,
+    Doctor,
+    Patient,
+    Payment,
+    Slot,
+    User,
+)
+from app.schemas.appointment import AppointmentOut
+from app.services.credit_service import (
+    apply_credit,
+    find_usable_credit,
+    release_credit,
+)
+
+LOCK_MINUTES = 10
+
+
+def start_booking(
+    db: Session,
+    user: User,
+    slot_id: int,
+    reason: str,
+    medical_notes: str | None,
+) -> Appointment:
+    patient = db.query(Patient).filter(Patient.user_id == user.id).first()
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient profile not found")
+
+    slot = db.get(Slot, slot_id)
+    if not slot:
+        raise HTTPException(status_code=404, detail="Slot not found")
+    doctor = db.get(Doctor, slot.doctor_id)
+
+    now = datetime.now()
+    locked_until = now + timedelta(minutes=LOCK_MINUTES)
+
+    # One atomic UPDATE: only one patient can win the slot.
+    # A lock whose time has run out counts as free again.
+    won = (
+        db.query(Slot)
+        .filter(
+            Slot.id == slot_id,
+            Slot.start_at > now,
+            or_(
+                Slot.status == "available",
+                and_(Slot.status == "locked", Slot.locked_until <= now),
+            ),
+        )
+        .update(
+            {"status": "locked", "locked_until": locked_until},
+            synchronize_session=False,
+        )
+    )
+    if won != 1:
+        db.rollback()
+        raise HTTPException(status_code=409, detail="This slot is no longer available")
+
+    # Release whoever held this slot before and never paid
+    stale = (
+        db.query(Appointment)
+        .filter(Appointment.slot_id == slot_id, Appointment.status == "payment_pending")
+        .all()
+    )
+    for old in stale:
+        old.status = "cancelled"
+        db.add(
+            AppointmentHistory(
+                appointment_id=old.id,
+                old_status="payment_pending",
+                new_status="cancelled",
+                note="Payment time expired",
+            )
+        )
+        db.query(Payment).filter(
+            Payment.appointment_id == old.id, Payment.status == "pending"
+        ).update({"status": "failed"}, synchronize_session=False)
+        release_credit(db, old)
+
+    appointment = Appointment(
+        booking_reference="APT-" + secrets.token_hex(4).upper(),
+        patient_id=patient.id,
+        doctor_id=doctor.id,
+        clinic_id=doctor.clinic_id,
+        slot_id=slot.id,
+        start_at=slot.start_at,
+        end_at=slot.end_at,
+        status="payment_pending",
+        payment_status="pending",
+        consultation_fee=doctor.consultation_fee,
+        token_amount=doctor.token_amount,
+        reason=reason,
+        medical_notes=medical_notes,
+    )
+    db.add(appointment)
+    db.flush()
+
+    db.add(
+        AppointmentHistory(
+            appointment_id=appointment.id,
+            changed_by_user_id=user.id,
+            old_status=None,
+            new_status="payment_pending",
+            note="Booking started, slot locked",
+        )
+    )
+
+    # A token credit from an earlier cancel pays the token, fully or in part
+    token_due = doctor.token_amount
+    credit = find_usable_credit(db, patient.id)
+    if credit:
+        token_due = apply_credit(db, appointment, credit, doctor.token_amount)
+
+    if token_due > 0:
+        db.add(
+            Payment(
+                appointment_id=appointment.id,
+                amount=token_due,
+                payment_type="token",
+                method="online",
+                status="pending",
+                transaction_reference="TXN-" + uuid.uuid4().hex[:16].upper(),
+            )
+        )
+    else:
+        # Nothing left to pay: the booking is confirmed straight away
+        appointment.status = "confirmed"
+        appointment.payment_status = "token_paid"
+        db.query(Slot).filter(Slot.id == slot.id).update(
+            {"status": "booked", "locked_until": None}, synchronize_session=False
+        )
+        db.add(
+            AppointmentHistory(
+                appointment_id=appointment.id,
+                changed_by_user_id=user.id,
+                old_status="payment_pending",
+                new_status="confirmed",
+                note="Token covered by credit",
+            )
+        )
+
+    db.commit()
+    return appointment
+
+
+def to_appointment_out(db: Session, appointment: Appointment) -> AppointmentOut:
+    doctor = db.get(Doctor, appointment.doctor_id)
+    doctor_user = db.get(User, doctor.user_id)
+
+    pay_before = None
+    if appointment.status == "payment_pending":
+        pay_before = db.get(Slot, appointment.slot_id).locked_until
+
+    payments = (
+        db.query(Payment).filter(Payment.appointment_id == appointment.id).all()
+    )
+    credit_applied = sum(
+        p.amount
+        for p in payments
+        if p.payment_type == "token_transfer" and p.status == "success"
+    )
+    token_due = sum(
+        p.amount
+        for p in payments
+        if p.payment_type == "token" and p.status == "pending"
+    )
+
+    remaining = (
+        0
+        if appointment.payment_status == "fully_paid"
+        else appointment.consultation_fee - appointment.token_amount
+    )
+
+    return AppointmentOut(
+        id=appointment.id,
+        booking_reference=appointment.booking_reference,
+        doctor_name=doctor_user.name,
+        specialty=doctor.specialty,
+        start_at=appointment.start_at,
+        end_at=appointment.end_at,
+        status=appointment.status,
+        payment_status=appointment.payment_status,
+        consultation_fee=appointment.consultation_fee,
+        token_amount=appointment.token_amount,
+        remaining_amount=remaining,
+        credit_applied=credit_applied,
+        token_due=token_due,
+        pay_before=pay_before,
+    )
+
+
+======================================================================
+FILE: app/services/cancellation_service.py
+======================================================================
+import os
+from datetime import datetime, timedelta
+
+from fastapi import HTTPException
+from sqlalchemy.orm import Session
+
+from app.models import (
+    Appointment,
+    AppointmentHistory,
+    AuditLog,
+    Patient,
+    Payment,
+    Slot,
+    TokenCredit,
+    User,
+)
+
+
+def _cutoff_hours() -> int:
+    return int(os.getenv("CANCEL_CUTOFF_HOURS", "2"))
+
+
+def _credit_days() -> int:
+    return int(os.getenv("CREDIT_VALID_DAYS", "2"))
+
+
+def cancel_by_patient(
+    db: Session, user: User, appointment_id: int
+) -> tuple[Appointment, TokenCredit]:
+    patient = db.query(Patient).filter(Patient.user_id == user.id).first()
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient profile not found")
+
+    # Locks the row, so a double click cannot create two credits
+    appointment = (
+        db.query(Appointment)
+        .filter(Appointment.id == appointment_id)
+        .with_for_update()
+        .first()
+    )
+    if not appointment or appointment.patient_id != patient.id:
+        raise HTTPException(status_code=404, detail="Appointment not found")
+
+    if appointment.status != "confirmed" or appointment.payment_status != "token_paid":
+        raise HTTPException(
+            status_code=409,
+            detail="Cannot cancel: appointment is " + appointment.status,
+        )
+
+    now = datetime.now()
+    hours = _cutoff_hours()
+    if now > appointment.start_at - timedelta(hours=hours):
+        raise HTTPException(
+            status_code=409,
+            detail=f"Cancelling is closed {hours} hours before the appointment",
+        )
+
+    # Everything paid toward the token counts, whether online or from an earlier credit
+    paid_payments = (
+        db.query(Payment)
+        .filter(
+            Payment.appointment_id == appointment.id,
+            Payment.payment_type.in_(["token", "token_transfer"]),
+            Payment.status == "success",
+        )
+        .all()
+    )
+    paid_amount = sum(p.amount for p in paid_payments)
+    if paid_amount <= 0:
+        raise HTTPException(
+            status_code=409, detail="No verified token payment found for this appointment"
+        )
+
+    # Free the slot for other patients
+    slot = (
+        db.query(Slot).filter(Slot.id == appointment.slot_id).with_for_update().first()
+    )
+    if slot and slot.status == "booked":
+        slot.status = "available"
+        slot.locked_until = None
+
+    credit = TokenCredit(
+        patient_id=patient.id,
+        source_appointment_id=appointment.id,
+        amount=paid_amount,
+        status="active",
+        expires_at=now + timedelta(days=_credit_days()),
+    )
+    db.add(credit)
+
+    appointment.status = "cancelled"
+    db.add(
+        AppointmentHistory(
+            appointment_id=appointment.id,
+            changed_by_user_id=user.id,
+            old_status="confirmed",
+            new_status="cancelled",
+            note=f"Cancelled by patient, token Rs {credit.amount} kept as credit",
+        )
+    )
+    db.add(
+        AuditLog(
+            user_id=user.id,
+            action="appointment_cancelled",
+            entity_type="appointment",
+            entity_id=appointment.id,
+            details=f"credit={credit.amount}; expires={credit.expires_at:%Y-%m-%d %H:%M}",
+        )
+    )
+    db.commit()
+    return appointment, credit
+
+
+======================================================================
+FILE: app/services/collection_service.py
+======================================================================
+import uuid
+from datetime import datetime
+
+from fastapi import HTTPException
+from sqlalchemy.orm import Session
+
+from app.models import Appointment, AppointmentHistory, AuditLog, Payment, User
+from app.services.appointment_actions import _get_locked
+
+PAYABLE_STATUSES = ("arrived", "in_consultation", "completed")
+
+
+def collect_remaining(
+    db: Session, user: User, appointment_id: int, method: str
+) -> tuple[Appointment, Payment]:
+    # Locks the row, so a double click cannot record the payment twice
+    appointment = _get_locked(db, user, appointment_id)
+
+    if appointment.status not in PAYABLE_STATUSES:
+        raise HTTPException(
+            status_code=409,
+            detail="Cannot collect payment: appointment is " + appointment.status,
+        )
+    if appointment.payment_status == "fully_paid":
+        raise HTTPException(
+            status_code=409, detail="This appointment is already fully paid"
+        )
+    if appointment.payment_status != "token_paid":
+        raise HTTPException(
+            status_code=409, detail="Token payment is not verified for this appointment"
+        )
+
+    amount = appointment.consultation_fee - appointment.token_amount
+    if amount <= 0:
+        raise HTTPException(status_code=409, detail="Nothing is due for this appointment")
+
+    now = datetime.now()
+    payment = Payment(
+        appointment_id=appointment.id,
+        amount=amount,
+        payment_type="remaining",
+        method=method,
+        status="success",
+        transaction_reference="TXN-" + uuid.uuid4().hex[:16].upper(),
+        collected_by_user_id=user.id,
+        paid_at=now,
+    )
+    db.add(payment)
+
+    appointment.payment_status = "fully_paid"
+
+    db.add(
+        AppointmentHistory(
+            appointment_id=appointment.id,
+            changed_by_user_id=user.id,
+            old_status=appointment.status,
+            new_status=appointment.status,
+            note=f"Remaining Rs {amount} collected ({method}), fully paid",
+        )
+    )
+    db.add(
+        AuditLog(
+            user_id=user.id,
+            action="payment_collected",
+            entity_type="appointment",
+            entity_id=appointment.id,
+            details=f"amount={amount}; method={method}; ref={payment.transaction_reference}",
+        )
+    )
+    db.commit()
+    return appointment, payment
+
+
+======================================================================
+FILE: app/services/credit_service.py
+======================================================================
+import uuid
+from datetime import datetime
+
+from sqlalchemy.orm import Session
+
+from app.models import Appointment, AppointmentHistory, Payment, TokenCredit
+
+
+def find_usable_credit(db: Session, patient_id: int) -> TokenCredit | None:
+    now = datetime.now()
+    return (
+        db.query(TokenCredit)
+        .filter(
+            TokenCredit.patient_id == patient_id,
+            TokenCredit.status == "active",
+            TokenCredit.expires_at > now,
+        )
+        .order_by(TokenCredit.expires_at)
+        .with_for_update()
+        .first()
+    )
+
+
+def apply_credit(
+    db: Session, appointment: Appointment, credit: TokenCredit, token_amount: int
+) -> int:
+    """Uses the credit for this appointment. Returns the token still to pay online."""
+    now = datetime.now()
+    applied = min(credit.amount, token_amount)
+    leftover = credit.amount - applied  # lost, by the clinic's rule
+    token_due = token_amount - applied
+
+    credit.status = "used"
+    credit.used_for_appointment_id = appointment.id
+    credit.closed_at = now
+
+    db.add(
+        Payment(
+            appointment_id=appointment.id,
+            amount=applied,
+            payment_type="token_transfer",
+            method="credit",
+            status="success",
+            gateway="credit",
+            transaction_reference="TXN-" + uuid.uuid4().hex[:16].upper(),
+            paid_at=now,
+        )
+    )
+
+    note = f"Token credit Rs {applied} applied"
+    if leftover:
+        note += f", Rs {leftover} of the credit is not refundable"
+    db.add(
+        AppointmentHistory(
+            appointment_id=appointment.id,
+            old_status="payment_pending",
+            new_status="payment_pending",
+            note=note,
+        )
+    )
+    return token_due
+
+
+def release_credit(db: Session, appointment: Appointment) -> None:
+    """Gives the credit back when an unpaid booking that used it falls through."""
+    credit = (
+        db.query(TokenCredit)
+        .filter(
+            TokenCredit.used_for_appointment_id == appointment.id,
+            TokenCredit.status == "used",
+        )
+        .first()
+    )
+    if not credit:
+        return
+
+    for payment in db.query(Payment).filter(
+        Payment.appointment_id == appointment.id,
+        Payment.payment_type == "token_transfer",
+        Payment.status == "success",
+    ):
+        payment.status = "failed"
+
+    now = datetime.now()
+    credit.used_for_appointment_id = None
+    if credit.expires_at > now:
+        credit.status = "active"
+        credit.closed_at = None
+    else:
+        credit.status = "expired"
+        credit.closed_at = now
+
+    db.add(
+        AppointmentHistory(
+            appointment_id=appointment.id,
+            old_status="payment_pending",
+            new_status="cancelled",
+            note="Booking not paid, token credit released",
+        )
+    )
+
+
+======================================================================
+FILE: app/services/expiry_service.py
+======================================================================
+from datetime import datetime
+
+from sqlalchemy import or_
+from sqlalchemy.orm import Session
+
+from app.models import Appointment, AppointmentHistory, Payment, Slot, TokenCredit
+from app.services.credit_service import release_credit
+
+
+def expire_stale_bookings(db: Session, patient_id: int | None = None) -> int:
+    now = datetime.now()
+
+    query = (
+        db.query(Appointment, Slot)
+        .join(Slot, Slot.id == Appointment.slot_id)
+        .filter(
+            Appointment.status == "payment_pending",
+            or_(Slot.locked_until.is_(None), Slot.locked_until <= now),
+        )
+    )
+    if patient_id is not None:
+        query = query.filter(Appointment.patient_id == patient_id)
+
+    count = 0
+    for appointment, slot in query.all():
+        appointment.status = "cancelled"
+        db.query(Payment).filter(
+            Payment.appointment_id == appointment.id, Payment.status == "pending"
+        ).update({"status": "failed"}, synchronize_session=False)
+        release_credit(db, appointment)
+        if slot.status == "locked":
+            slot.status = "available"
+            slot.locked_until = None
+        db.add(
+            AppointmentHistory(
+                appointment_id=appointment.id,
+                old_status="payment_pending",
+                new_status="cancelled",
+                note="Payment time expired, slot released",
+            )
+        )
+        count += 1
+
+    # Credits that were not used or collected within their days are lost
+    expired = (
+        db.query(TokenCredit)
+        .filter(TokenCredit.status == "active", TokenCredit.expires_at <= now)
+        .update({"status": "expired", "closed_at": now}, synchronize_session=False)
+    )
+
+    if count or expired:
+        db.commit()
+    return count
+
+
+======================================================================
+FILE: app/services/otp_service.py
+======================================================================
+import os
+import secrets
+from datetime import datetime, timedelta
+
+from fastapi import HTTPException
+from sqlalchemy.orm import Session
+
+from app.core.security import hash_password, verify_password
+from app.models import OtpCode, User
+
+OTP_VALID_MINUTES = 5
+MAX_WRONG_TRIES = 5
+RESEND_AFTER_SECONDS = 60
+MAX_REQUESTS_PER_HOUR = 5
+
+BAD_CODE = "Incorrect or expired code"
+
+
+def normalize_phone(phone: str) -> str:
+    phone = phone.replace(" ", "")
+    if len(phone) != 10 or not phone.isdigit() or phone[0] not in "6789":
+        raise HTTPException(
+            status_code=422, detail="Enter a valid 10-digit mobile number"
+        )
+    return phone
+
+
+def _dev_mode() -> bool:
+    return os.getenv("ENABLE_DEV_OTP") == "true"
+
+
+def _deliver(phone: str, code: str) -> None:
+    if _dev_mode():
+        print(f"[DEV OTP] {phone}: {code}")
+        return
+    # The real SMS provider goes here once it is chosen
+    raise HTTPException(status_code=503, detail="SMS sending is not set up yet")
+
+
+def request_otp(db: Session, phone: str) -> None:
+    phone = normalize_phone(phone)
+    now = datetime.now()
+
+    existing = db.query(User).filter(User.phone == phone).first()
+    if existing and (existing.role != "patient" or not existing.is_active):
+        # Staff use the password login. The reply looks the same, nothing is sent.
+        if _dev_mode():
+            print(f"[DEV OTP] {phone} is a staff or disabled account, no code sent")
+        return
+
+    latest = (
+        db.query(OtpCode)
+        .filter(OtpCode.phone == phone)
+        .order_by(OtpCode.id.desc())
+        .first()
+    )
+    if latest:
+        elapsed = (now - latest.created_at).total_seconds()
+        if elapsed < RESEND_AFTER_SECONDS:
+            wait = int(RESEND_AFTER_SECONDS - elapsed) + 1
+            raise HTTPException(
+                status_code=429,
+                detail=f"Please wait {wait} seconds before asking for a new code",
+            )
+
+    recent = (
+        db.query(OtpCode)
+        .filter(OtpCode.phone == phone, OtpCode.created_at >= now - timedelta(hours=1))
+        .count()
+    )
+    if recent >= MAX_REQUESTS_PER_HOUR:
+        raise HTTPException(
+            status_code=429, detail="Too many code requests. Try again in an hour."
+        )
+
+    code = f"{secrets.randbelow(1_000_000):06d}"
+
+    # Only the newest code may work
+    db.query(OtpCode).filter(
+        OtpCode.phone == phone, OtpCode.used_at.is_(None)
+    ).update({"used_at": now}, synchronize_session=False)
+
+    db.add(
+        OtpCode(
+            phone=phone,
+            code_hash=hash_password(code),
+            expires_at=now + timedelta(minutes=OTP_VALID_MINUTES),
+            created_at=now,
+        )
+    )
+    _deliver(phone, code)  # if sending fails, nothing is saved
+    db.commit()
+
+
+def verify_otp(db: Session, phone: str, code: str, consume: bool = True) -> str:
+    phone = normalize_phone(phone)
+    now = datetime.now()
+
+    if len(code) != 6 or not code.isdigit():
+        raise HTTPException(status_code=400, detail=BAD_CODE)
+
+    otp = (
+        db.query(OtpCode)
+        .filter(OtpCode.phone == phone, OtpCode.used_at.is_(None))
+        .order_by(OtpCode.id.desc())
+        .with_for_update()
+        .first()
+    )
+    if not otp or otp.expires_at <= now or otp.attempts >= MAX_WRONG_TRIES:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=BAD_CODE)
+
+    if not verify_password(code, otp.code_hash):
+        otp.attempts += 1
+        db.commit()  # the wrong try must be saved even though we raise an error
+        raise HTTPException(status_code=400, detail=BAD_CODE)
+
+    if consume:
+        otp.used_at = now
+        db.commit()
+    else:
+        db.rollback()  # code is right but stays usable, nothing is changed
+    return phone
+
+
+======================================================================
+FILE: app/services/payment_service.py
+======================================================================
+from datetime import datetime
+
+from fastapi import HTTPException
+from sqlalchemy.orm import Session
+
+from app.models import Appointment, AppointmentHistory, Payment, Slot
+from app.services.credit_service import release_credit
+
+
+def confirm_token_payment(
+    db: Session,
+    transaction_reference: str,
+    gateway: str,
+    gateway_payment_id: str,
+    user_id: int | None = None,
+) -> Appointment:
+    # Lock these rows while we work, so two callbacks can't run at once
+    payment = (
+        db.query(Payment)
+        .filter(Payment.transaction_reference == transaction_reference)
+        .with_for_update()
+        .first()
+    )
+    if not payment:
+        raise HTTPException(status_code=404, detail="Payment not found")
+
+    appointment = (
+        db.query(Appointment)
+        .filter(Appointment.id == payment.appointment_id)
+        .with_for_update()
+        .first()
+    )
+
+    # Duplicate callback: already confirmed, change nothing
+    if payment.status == "success":
+        return appointment
+
+    if payment.payment_type != "token":
+        raise HTTPException(status_code=400, detail="Not a token payment")
+
+    if appointment.status != "payment_pending" or payment.status != "pending":
+        raise HTTPException(
+            status_code=409, detail="This booking can no longer be paid"
+        )
+
+    slot = db.query(Slot).filter(Slot.id == appointment.slot_id).with_for_update().first()
+    now = datetime.now()
+
+    # Time ran out: release the slot and cancel the booking
+    if slot.status != "locked" or slot.locked_until is None or slot.locked_until <= now:
+        appointment.status = "cancelled"
+        payment.status = "failed"
+        release_credit(db, appointment)
+        if slot.status == "locked":
+            slot.status = "available"
+            slot.locked_until = None
+        db.add(
+            AppointmentHistory(
+                appointment_id=appointment.id,
+                changed_by_user_id=user_id,
+                old_status="payment_pending",
+                new_status="cancelled",
+                note="Payment time expired, slot released",
+            )
+        )
+        db.commit()
+        raise HTTPException(
+            status_code=409, detail="Payment time expired. Please book again."
+        )
+
+    payment.status = "success"
+    payment.gateway = gateway
+    payment.gateway_payment_id = gateway_payment_id
+    payment.paid_at = now
+
+    appointment.status = "confirmed"
+    appointment.payment_status = "token_paid"
+
+    slot.status = "booked"
+    slot.locked_until = None
+
+    db.add(
+        AppointmentHistory(
+            appointment_id=appointment.id,
+            changed_by_user_id=user_id,
+            old_status="payment_pending",
+            new_status="confirmed",
+            note="Token payment verified (" + gateway + ")",
+        )
+    )
+    db.commit()
+    return appointment
+
+
+======================================================================
+FILE: app/services/refund_service.py
+======================================================================
+import uuid
+from datetime import datetime
+
+from fastapi import HTTPException
+from sqlalchemy.orm import Session
+
+from app.models import (
+    Appointment,
+    AppointmentHistory,
+    AuditLog,
+    Payment,
+    Receptionist,
+    Refund,
+    TokenCredit,
+    User,
+)
+
+
+def refund_credit_at_desk(
+    db: Session, user: User, credit_id: int, method: str
+) -> tuple[TokenCredit, Refund]:
+    receptionist = db.query(Receptionist).filter(Receptionist.user_id == user.id).first()
+    if not receptionist:
+        raise HTTPException(status_code=404, detail="Receptionist profile not found")
+
+    # Locks the credit, so two clicks cannot return the money twice
+    credit = (
+        db.query(TokenCredit)
+        .filter(TokenCredit.id == credit_id)
+        .with_for_update()
+        .first()
+    )
+    source = db.get(Appointment, credit.source_appointment_id) if credit else None
+
+    # Same answer whether it does not exist or belongs to another clinic
+    if not credit or not source or source.clinic_id != receptionist.clinic_id:
+        raise HTTPException(status_code=404, detail="Credit not found")
+
+    now = datetime.now()
+    if credit.status != "active":
+        raise HTTPException(
+            status_code=409, detail="This credit is already " + credit.status
+        )
+    if credit.expires_at <= now:
+        credit.status = "expired"
+        credit.closed_at = now
+        db.commit()
+        raise HTTPException(status_code=409, detail="This credit has expired")
+
+    payment = (
+        db.query(Payment)
+        .filter(
+            Payment.appointment_id == source.id,
+            Payment.payment_type.in_(["token", "token_transfer"]),
+            Payment.status == "success",
+        )
+        .order_by(Payment.id.desc())
+        .first()
+    )
+    if not payment:
+        raise HTTPException(status_code=409, detail="No payment found to refund")
+
+    reference = "RFD-" + uuid.uuid4().hex[:16].upper()
+    refund = Refund(
+        payment_id=payment.id,
+        appointment_id=source.id,
+        amount=credit.amount,
+        status="processed",
+        reason=f"Token credit returned at the clinic desk ({method})",
+        transaction_reference=reference,
+        created_at=now,
+        processed_at=now,
+    )
+    db.add(refund)
+
+    payment.status = "refunded"
+    source.payment_status = "refunded"
+    credit.status = "refunded"
+    credit.closed_at = now
+
+    db.add(
+        AppointmentHistory(
+            appointment_id=source.id,
+            changed_by_user_id=user.id,
+            old_status=source.status,
+            new_status=source.status,
+            note=f"Token Rs {credit.amount} returned at the desk ({method})",
+        )
+    )
+    db.add(
+        AuditLog(
+            user_id=user.id,
+            action="token_refunded",
+            entity_type="token_credit",
+            entity_id=credit.id,
+            details=(
+                f"amount={credit.amount}; method={method}; ref={reference}; "
+                f"appointment={source.booking_reference}"
+            ),
+        )
+    )
+    db.commit()
+    return credit, refund
+
+
+======================================================================
+FILE: app/services/slot_service.py
+======================================================================
+from datetime import date, datetime, time, timedelta
+
+from sqlalchemy.orm import Session
+
+from app.models import Doctor, DoctorSchedule, ScheduleException, Slot
+
+
+def _overlaps(a_start, a_end, b_start, b_end) -> bool:
+    return a_start < b_end and b_start < a_end
+
+
+def generate_slots(db: Session, doctor: Doctor, days_ahead: int) -> int:
+    today = date.today()
+    now = datetime.now()
+    last_day = today + timedelta(days=days_ahead - 1)
+    step = timedelta(minutes=doctor.slot_duration_minutes)
+
+    schedules = {
+        s.day_of_week: s
+        for s in db.query(DoctorSchedule).filter(
+            DoctorSchedule.doctor_id == doctor.id,
+            DoctorSchedule.is_active == True,  # noqa: E712
+        )
+    }
+
+    exceptions = (
+        db.query(ScheduleException)
+        .filter(
+            ScheduleException.doctor_id == doctor.id,
+            ScheduleException.exception_date >= today,
+            ScheduleException.exception_date <= last_day,
+        )
+        .all()
+    )
+
+    existing = {
+        start_at
+        for (start_at,) in db.query(Slot.start_at).filter(
+            Slot.doctor_id == doctor.id,
+            Slot.start_at >= datetime.combine(today, time.min),
+        )
+    }
+
+    created = 0
+    for offset in range(days_ahead):
+        day = today + timedelta(days=offset)
+        schedule = schedules.get(day.weekday())
+        if not schedule:
+            continue
+
+        # Times in this day that must stay free of slots
+        blocked = []
+        for ex in exceptions:
+            if ex.exception_date != day:
+                continue
+            if ex.start_time is None or ex.end_time is None:
+                blocked.append(
+                    (datetime.combine(day, time.min), datetime.combine(day, time.max))
+                )
+            else:
+                blocked.append(
+                    (
+                        datetime.combine(day, ex.start_time),
+                        datetime.combine(day, ex.end_time),
+                    )
+                )
+        if schedule.break_start and schedule.break_end:
+            blocked.append(
+                (
+                    datetime.combine(day, schedule.break_start),
+                    datetime.combine(day, schedule.break_end),
+                )
+            )
+
+        cursor = datetime.combine(day, schedule.start_time)
+        day_end = datetime.combine(day, schedule.end_time)
+
+        while cursor + step <= day_end:
+            slot_end = cursor + step
+
+            clash = next(
+                (b for b in blocked if _overlaps(cursor, slot_end, b[0], b[1])), None
+            )
+            if clash:
+                cursor = clash[1]  # jump to the end of the break or block
+                continue
+
+            if cursor > now and cursor not in existing:
+                db.add(
+                    Slot(
+                        doctor_id=doctor.id,
+                        start_at=cursor,
+                        end_at=slot_end,
+                        status="available",
+                    )
+                )
+                created += 1
+
+            cursor = slot_end
+
+    db.commit()
+    return created

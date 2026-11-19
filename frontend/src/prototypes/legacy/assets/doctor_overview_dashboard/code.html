@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="web_dashboard" name="shell-type"/>
+<title>CuraPulse | Clinical Workspace</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+            }
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    body { font-feature-settings: "cv02", "cv03", "cv04", "cv11"; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #CBD5E1; }
+  </style>
+</head>
+<body class="bg-[#F8FAFC] text-slate-800 font-sans antialiased min-h-screen flex">
+<!-- MINIMAL SIDEBAR (Linear/Stripe aesthetic) -->
+<aside class="w-60 bg-white border-r border-slate-200/80 flex flex-col justify-between flex-shrink-0 min-h-screen fixed top-0 bottom-0 left-0 z-30">
+<div class="p-5">
+<!-- App Brand -->
+<div class="flex items-center gap-2.5 px-2 pb-6 border-b border-slate-100">
+<div class="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-sm font-bold text-sm tracking-tight">
+          C
+        </div>
+<div>
+<span class="font-semibold text-slate-900 tracking-tight text-[15px] block leading-none">CuraPulse</span>
+<span class="text-[11px] text-slate-400 mt-1 block font-normal">Apex Hub • Indiranagar</span>
+</div>
+</div>
+<!-- Navigation Menu -->
+<div class="mt-6 space-y-6">
+<div>
+<p class="text-[11px] font-semibold tracking-wider text-slate-400 uppercase px-2 mb-2">Clinical</p>
+<nav class="space-y-0.5">
+<a class="flex items-center justify-between px-2.5 py-1.5 rounded-lg text-[13px] font-medium bg-slate-100/80 text-slate-900" href="#">
+<span class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-[19px] text-slate-700">dashboard</span>
+                Workspace
+              </span>
+<span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+</a>
+<a class="flex items-center justify-between px-2.5 py-1.5 rounded-lg text-[13px] font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors" href="#">
+<span class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-[19px] text-slate-400">schedule</span>
+                Today's Queue
+              </span>
+<span class="text-[11px] font-medium text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">6 wait</span>
+</a>
+<a class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-[13px] font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors" href="#">
+<span class="material-symbols-outlined text-[19px] text-slate-400">calendar_today</span>
+              Appointments
+            </a>
+<a class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-[13px] font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors" href="#">
+<span class="material-symbols-outlined text-[19px] text-slate-400">group</span>
+              Patient Roster
+            </a>
+</nav>
+</div>
+<div>
+<p class="text-[11px] font-semibold tracking-wider text-slate-400 uppercase px-2 mb-2">Management</p>
+<nav class="space-y-0.5">
+<a class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-[13px] font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors" href="#">
+<span class="material-symbols-outlined text-[19px] text-slate-400">tune</span>
+              Queue Rules
+            </a>
+<a class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-[13px] font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors" href="#">
+<span class="material-symbols-outlined text-[19px] text-slate-400">payments</span>
+              Desk Billing
+            </a>
+<a class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-[13px] font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors" href="#">
+<span class="material-symbols-outlined text-[19px] text-slate-400">analytics</span>
+              Analytics
+            </a>
+</nav>
+</div>
+</div>
+</div>
+<!-- Doctor Profile bottom -->
+<div class="p-4 border-t border-slate-100 flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<img alt="Dr. Rajesh Sharma" class="w-8 h-8 rounded-full object-cover ring-1 ring-slate-200" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD1zKdn45Kc-lfdKi9dSYCUhTDSVhjP-ZMn8mQdNCx4FLIy9TB4Q55jYc9mgMXGbqR0YP00_Heqz7EBFkoPUNJUUdH0Lqo2ycZEYeBD_fdOh60HRMOWIvjiIMpdL40p0euwPnBRNnOI_3Qzo-vFtpWQOzxILuye8clV4YTpWqUAGv2Xws4BOJqmzEPg1wCl1K9u2cQNMYH0vdMr6v8RuXwZzBqjj2-Mn6rUDTK5-cCE"/>
+<div class="leading-tight">
+<p class="text-[13px] font-semibold text-slate-900">Dr. R. Sharma</p>
+<p class="text-[11px] text-slate-400">Cardiology</p>
+</div>
+</div>
+<button class="text-slate-400 hover:text-slate-600 p-1" title="Settings">
+<span class="material-symbols-outlined text-[18px]">settings</span>
+</button>
+</div>
+</aside>
+<!-- MAIN WORKSPACE -->
+<div class="pl-60 flex-1 flex flex-col min-w-0">
+<!-- SUBTLE HEADER BAR -->
+<header class="h-16 bg-white/90 backdrop-blur border-b border-slate-200/80 px-8 flex items-center justify-between sticky top-0 z-20">
+<!-- Search Input -->
+<div class="relative w-80">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-slate-400">search</span>
+<input class="w-full bg-slate-50/80 border border-slate-200 rounded-lg pl-9 pr-8 py-1.5 text-[13px] text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-slate-300 focus:bg-white transition-all" placeholder="Search patient, token, ID..." type="text"/>
+<span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 bg-white border border-slate-200 px-1.5 py-0.5 rounded font-mono">⌘K</span>
+</div>
+<!-- Actions & Clinical Time -->
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 text-[12px] text-slate-500 font-medium border-r border-slate-200 pr-4">
+<span class="material-symbols-outlined text-[16px] text-slate-400">schedule</span>
+<span>10:42 AM</span>
+<span class="text-slate-300">•</span>
+<span>Wed, 24 Oct</span>
+</div>
+<button class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-[13px] font-medium shadow-sm transition-all" onclick="showQuickToast('Walk-in token modal opened')">
+<span class="material-symbols-outlined text-[16px]">add</span>
+<span>Add Walk-in</span>
+</button>
+</div>
+</header>
+<!-- CONTENT BODY -->
+<main class="p-8 max-w-7xl w-full mx-auto space-y-6">
+<!-- WELCOME & STATUS HEADER -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+<div>
+<h1 class="text-xl font-bold tracking-tight text-slate-900">Good morning, Dr. Sharma</h1>
+<p class="text-[13px] text-slate-500 mt-0.5">Here is your live outpatient queue and patient updates for today.</p>
+</div>
+<div class="flex items-center gap-2">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/60 text-emerald-700 text-[12px] font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+<span>OPD Active • Room 204</span>
+</div>
+<button class="px-2.5 py-1 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 text-[12px] font-medium border border-slate-200 transition-colors">
+            End Shift
+          </button>
+</div>
+</div>
+<!-- 4 CLEAN STAT METRICS -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+<!-- Metric 1 -->
+<div class="bg-white p-5 rounded-xl border border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+<div class="flex items-center justify-between text-slate-400 mb-2">
+<span class="text-[12px] font-medium text-slate-500">Patients Today</span>
+<span class="material-symbols-outlined text-[18px]">group</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-2xl font-bold tracking-tight text-slate-900">28</span>
+<span class="text-[12px] font-medium text-slate-400">14 completed</span>
+</div>
+<div class="mt-3 w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+<div class="bg-slate-900 h-full rounded-full" style="width: 50%"></div>
+</div>
+</div>
+<!-- Metric 2 -->
+<div class="bg-white p-5 rounded-xl border border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+<div class="flex items-center justify-between text-slate-400 mb-2">
+<span class="text-[12px] font-medium text-slate-500">Waiting</span>
+<span class="material-symbols-outlined text-[18px]">hourglass_empty</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-2xl font-bold tracking-tight text-slate-900">6</span>
+<span class="text-[12px] font-medium text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded">~9m wait</span>
+</div>
+<p class="text-[11px] text-slate-400 mt-3 font-normal">Next in queue ready in lounge</p>
+</div>
+<!-- Metric 3 -->
+<div class="bg-white p-5 rounded-xl border border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+<div class="flex items-center justify-between text-slate-400 mb-2">
+<span class="text-[12px] font-medium text-slate-500">Token Advances</span>
+<span class="material-symbols-outlined text-[18px]">confirmation_number</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-2xl font-bold tracking-tight text-slate-900">₹2,800</span>
+<span class="text-[12px] font-medium text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">Verified</span>
+</div>
+<p class="text-[11px] text-slate-400 mt-3 font-normal">Pre-credited to desk ledger</p>
+</div>
+<!-- Metric 4 -->
+<div class="bg-white p-5 rounded-xl border border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+<div class="flex items-center justify-between text-slate-400 mb-2">
+<span class="text-[12px] font-medium text-slate-500">Today's Net Desk</span>
+<span class="material-symbols-outlined text-[18px]">account_balance_wallet</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-2xl font-bold tracking-tight text-slate-900">₹14,200</span>
+<span class="text-[12px] font-medium text-slate-400">Total collected</span>
+</div>
+<p class="text-[11px] text-slate-400 mt-3 font-normal">Zero reconciliation mismatch</p>
+</div>
+</div>
+<!-- DISCRETE NOTIFICATION RIBBON (EARLY SLOT ALERT) -->
+<div class="bg-white border border-blue-100 rounded-xl px-4 py-3 shadow-[0_1px_2px_rgba(0,0,0,0.02)] flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all" id="earlyAlertRibbon">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[18px]">bolt</span>
+</div>
+<p class="text-[13px] text-slate-700">
+<span class="font-semibold text-slate-900">Early slot available:</span> Previous consult wrapped early. 
+            <span class="font-medium text-blue-600">Priya Nair</span> (10:30 AM) can be notified to advance to <span class="font-medium text-slate-900">10:18 AM</span>.
+          </p>
+</div>
+<div class="flex items-center gap-2 self-end sm:self-center flex-shrink-0">
+<button class="px-3 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-[12px] font-medium transition-colors" onclick="dismissAlert('Slot shifted: Priya Nair notified.')">
+            Notify Next
+          </button>
+<button class="px-2.5 py-1 rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-100 text-[12px] font-medium transition-colors" onclick="document.getElementById('earlyAlertRibbon').remove()">
+            Dismiss
+          </button>
+</div>
+</div>
+<!-- MAIN QUEUE & PATIENT CONSOLE WORKSPACE -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+<!-- LEFT/CENTER: PATIENT QUEUE (7 Cols) -->
+<div class="lg:col-span-7 space-y-4">
+<div class="flex items-center justify-between">
+<div>
+<h2 class="text-base font-semibold text-slate-900">Patient Queue</h2>
+<p class="text-[12px] text-slate-500">Real-time consultation list for Room 204</p>
+</div>
+<div class="inline-flex p-0.5 rounded-lg bg-slate-100 border border-slate-200/60 text-[12px]">
+<button class="px-3 py-1 rounded-md bg-white font-medium text-slate-900 shadow-sm">All Slots (28)</button>
+<button class="px-3 py-1 rounded-md text-slate-500 hover:text-slate-900 font-medium">Waiting (6)</button>
+</div>
+</div>
+<!-- Queue Table Container -->
+<div class="bg-white rounded-xl border border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.02)] overflow-hidden">
+<div class="divide-y divide-slate-100">
+<!-- Queue Row 1: Selected In-Consultation -->
+<div class="p-4 hover:bg-slate-50/70 transition-colors flex items-center justify-between gap-4 cursor-pointer bg-blue-50/20 border-l-2 border-l-blue-600" onclick="switchPatient('Arjun Singhania', '62/M', 'Token #08', 'Hypertension &amp; Dyspnea', 'In Consultation', 'BP 138/88', '74 bpm', '98%', '₹700', '₹200', '₹500')">
+<div class="flex items-center gap-3.5 min-w-0">
+<div class="flex flex-col items-center justify-center w-11 h-11 rounded-lg bg-slate-50 border border-slate-200/60 flex-shrink-0">
+<span class="text-[10px] font-semibold text-slate-400 uppercase">Token</span>
+<span class="text-sm font-bold text-slate-800 leading-none">08</span>
+</div>
+<div class="min-w-0">
+<div class="flex items-center gap-2">
+<span class="font-semibold text-slate-900 text-[13px] truncate">Arjun Singhania</span>
+<span class="text-[12px] text-slate-400 font-normal">62M</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-blue-50 text-blue-700 border border-blue-200/50">
+                        In Consultation
+                      </span>
+</div>
+<div class="flex items-center gap-3 mt-1 text-[12px] text-slate-500">
+<span class="flex items-center gap-1 font-mono text-slate-600">10:00 AM</span>
+<span>•</span>
+<span class="text-slate-600">₹200 Paid / ₹500 at desk</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-2 flex-shrink-0">
+<span class="text-[11px] font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded-md">Active</span>
+</div>
+</div>
+<!-- Queue Row 2: Priya Nair -->
+<div class="p-4 hover:bg-slate-50/70 transition-colors flex items-center justify-between gap-4 cursor-pointer" onclick="switchPatient('Priya Nair', '34/F', 'Token #09', 'Hypertension Review &amp; Medication Titration', 'Ready in Vitals', 'BP 128/82', '72 bpm', '99%', '₹700', '₹200', '₹500')">
+<div class="flex items-center gap-3.5 min-w-0">
+<div class="flex flex-col items-center justify-center w-11 h-11 rounded-lg bg-slate-50 border border-slate-200/60 flex-shrink-0">
+<span class="text-[10px] font-semibold text-slate-400 uppercase">Token</span>
+<span class="text-sm font-bold text-slate-800 leading-none">09</span>
+</div>
+<div class="min-w-0">
+<div class="flex items-center gap-2">
+<span class="font-semibold text-slate-900 text-[13px] truncate">Priya Nair</span>
+<span class="text-[12px] text-slate-400 font-normal">34F</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200/50">
+                        Ready in Vitals
+                      </span>
+</div>
+<div class="flex items-center gap-3 mt-1 text-[12px] text-slate-500">
+<span class="flex items-center gap-1 font-mono text-slate-600">10:18 AM</span>
+<span>•</span>
+<span class="text-slate-600">₹200 Paid / ₹500 at desk</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-2 flex-shrink-0">
+<button class="px-2.5 py-1 text-[12px] font-medium rounded-lg text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors" onclick="event.stopPropagation(); showQuickToast('Called Priya Nair to Room 204');">
+                    Call Patient
+                  </button>
+</div>
+</div>
+<!-- Queue Row 3: Amit Saxena -->
+<div class="p-4 hover:bg-slate-50/70 transition-colors flex items-center justify-between gap-4 cursor-pointer" onclick="switchPatient('Amit Saxena', '52/M', 'Token #10', 'Chest Discomfort &amp; ECG Review', 'Waiting in Lounge', 'BP 144/92', '88 bpm', '97%', '₹1,200', '₹300', '₹900')">
+<div class="flex items-center gap-3.5 min-w-0">
+<div class="flex flex-col items-center justify-center w-11 h-11 rounded-lg bg-slate-50 border border-slate-200/60 flex-shrink-0">
+<span class="text-[10px] font-semibold text-slate-400 uppercase">Token</span>
+<span class="text-sm font-bold text-slate-800 leading-none">10</span>
+</div>
+<div class="min-w-0">
+<div class="flex items-center gap-2">
+<span class="font-semibold text-slate-900 text-[13px] truncate">Amit Saxena</span>
+<span class="text-[12px] text-slate-400 font-normal">52M</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-amber-50 text-amber-700 border border-amber-200/50">
+                        Waiting (16m)
+                      </span>
+</div>
+<div class="flex items-center gap-3 mt-1 text-[12px] text-slate-500">
+<span class="flex items-center gap-1 font-mono text-slate-600">10:45 AM</span>
+<span>•</span>
+<span class="text-slate-600">₹300 Paid / ₹900 at desk</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-2 flex-shrink-0">
+<button class="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100" onclick="event.stopPropagation(); showQuickToast('Viewing ECG report for Token #10');" title="ECG Report">
+<span class="material-symbols-outlined text-[18px]">ecg_heart</span>
+</button>
+<button class="px-2.5 py-1 text-[12px] font-medium rounded-lg text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors" onclick="event.stopPropagation(); showQuickToast('Called Amit Saxena');">
+                    Call
+                  </button>
+</div>
+</div>
+<!-- Buffer Row -->
+<div class="px-4 py-3 bg-slate-50/50 flex items-center justify-between text-slate-500">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[18px] text-slate-400">coffee</span>
+<span class="text-[12px] font-medium text-slate-600">11:15 AM — Buffer &amp; Clinic Break (15 mins)</span>
+</div>
+<button class="text-[11px] text-slate-400 hover:text-slate-700 font-medium">Allow Auto-Fill</button>
+</div>
+<!-- Queue Row 4: Sunita Kulkarni -->
+<div class="p-4 hover:bg-slate-50/70 transition-colors flex items-center justify-between gap-4 cursor-pointer" onclick="switchPatient('Sunita Kulkarni', '48/F', 'Token #11', 'Post-Angioplasty Follow-up', 'Confirmed (En Route)', 'BP 124/80', '68 bpm', '99%', '₹900', '₹200', '₹700')">
+<div class="flex items-center gap-3.5 min-w-0">
+<div class="flex flex-col items-center justify-center w-11 h-11 rounded-lg bg-slate-50 border border-slate-200/60 flex-shrink-0">
+<span class="text-[10px] font-semibold text-slate-400 uppercase">Token</span>
+<span class="text-sm font-bold text-slate-800 leading-none">11</span>
+</div>
+<div class="min-w-0">
+<div class="flex items-center gap-2">
+<span class="font-semibold text-slate-900 text-[13px] truncate">Sunita Kulkarni</span>
+<span class="text-[12px] text-slate-400 font-normal">48F</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-600 border border-slate-200">
+                        Confirmed (En Route)
+                      </span>
+</div>
+<div class="flex items-center gap-3 mt-1 text-[12px] text-slate-500">
+<span class="flex items-center gap-1 font-mono text-slate-600">11:30 AM</span>
+<span>•</span>
+<span class="text-slate-600">₹200 Paid / ₹700 at desk</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-2 flex-shrink-0">
+<span class="text-[11px] text-slate-400">ETA 6m</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- RIGHT: FOCUSED PATIENT CONSOLE (5 Cols) -->
+<div class="lg:col-span-5 space-y-4">
+<div class="flex items-center justify-between">
+<h2 class="text-base font-semibold text-slate-900">Current Consultation</h2>
+<span class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200/60" id="patientStatusPill">
+              Active Console
+            </span>
+</div>
+<!-- Focused Patient Card -->
+<div class="bg-white rounded-xl border border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-5 space-y-5">
+<!-- Patient Header Info -->
+<div class="flex items-start justify-between">
+<div>
+<h3 class="text-lg font-bold text-slate-900 leading-tight" id="consoleName">Arjun Singhania</h3>
+<p class="text-[12px] text-slate-400 mt-0.5" id="consoleSub">62/M • Token #08 • APX-88219</p>
+</div>
+<span class="text-[11px] font-mono font-medium px-2 py-0.5 bg-slate-100 text-slate-600 rounded" id="consoleTokenTag">
+                Token #08
+              </span>
+</div>
+<!-- Clean Vitals Pills -->
+<div>
+<p class="text-[11px] font-medium uppercase tracking-wider text-slate-400 mb-2">Recorded Vitals</p>
+<div class="grid grid-cols-3 gap-2">
+<div class="p-2.5 rounded-lg bg-slate-50 border border-slate-100 text-center">
+<span class="text-[11px] text-slate-400 block">Blood Pressure</span>
+<span class="text-[13px] font-semibold text-slate-800" id="vitalBP">138/88</span>
+</div>
+<div class="p-2.5 rounded-lg bg-slate-50 border border-slate-100 text-center">
+<span class="text-[11px] text-slate-400 block">Pulse Rate</span>
+<span class="text-[13px] font-semibold text-slate-800" id="vitalPulse">74 bpm</span>
+</div>
+<div class="p-2.5 rounded-lg bg-slate-50 border border-slate-100 text-center">
+<span class="text-[11px] text-slate-400 block">SpO2 Level</span>
+<span class="text-[13px] font-semibold text-slate-800" id="vitalSpo2">98%</span>
+</div>
+</div>
+</div>
+<!-- Notes Area -->
+<div>
+<label class="text-[11px] font-medium uppercase tracking-wider text-slate-400 mb-2 block">Clinical Observations &amp; Prescription Notes</label>
+<textarea class="w-full h-24 p-3 text-[13px] text-slate-800 bg-slate-50/70 border border-slate-200 rounded-lg placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-slate-300 resize-none transition-all" placeholder="Record symptoms, dosage changes, advice...">Patient reports mild retrosternal tightening following light morning exertion. Advised continued beta-blockers; monitoring resting heart rate.</textarea>
+</div>
+<!-- Billing & Balance Strip -->
+<div class="py-2.5 px-3 rounded-lg bg-slate-50/90 border border-slate-100 flex items-center justify-between text-[12px]">
+<span class="text-slate-500">Balance collectible at reception:</span>
+<span class="font-semibold text-slate-900 font-mono text-[13px]" id="consoleBalanceDue">₹500 <span class="font-normal text-slate-400 text-[11px]">(₹200 pre-paid)</span></span>
+</div>
+<!-- Primary Calm Action CTAs -->
+<div class="space-y-2 pt-1">
+<button class="w-full py-2.5 px-4 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium text-[13px] shadow-sm transition-colors flex items-center justify-center gap-2" onclick="showQuickToast('Consultation ended. Prescription dispatched to pharmacy &amp; patient app.');">
+<span class="material-symbols-outlined text-[18px]">check_circle</span>
+<span>Complete &amp; Prescribe</span>
+</button>
+<div class="grid grid-cols-2 gap-2">
+<button class="py-2 px-3 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 font-medium text-[12px] transition-colors flex items-center justify-center gap-1.5" onclick="showQuickToast('Order Labs opened');">
+<span class="material-symbols-outlined text-[16px] text-slate-400">biotech</span>
+<span>Order Labs</span>
+</button>
+<button class="py-2 px-3 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 font-medium text-[12px] transition-colors flex items-center justify-center gap-1.5" onclick="showQuickToast('Patient history records loaded');">
+<span class="material-symbols-outlined text-[16px] text-slate-400">history</span>
+<span>Past History</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- BOTTOM ROW: MINIMAL SPARKLINE / VOLUME METRICS -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+<!-- Clean Minimal Bar Chart -->
+<div class="bg-white p-5 rounded-xl border border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.02)] flex flex-col justify-between">
+<div class="flex items-center justify-between mb-4">
+<div>
+<h4 class="text-[13px] font-semibold text-slate-900">Weekly Patient Load</h4>
+<p class="text-[11px] text-slate-400">Daily completed consultations this week</p>
+</div>
+<span class="text-[12px] text-slate-500 font-medium">Avg: 24 / day</span>
+</div>
+<!-- Minimal SVG Bar Chart -->
+<div class="py-2">
+<svg class="w-full h-20" viewbox="0 0 280 60">
+<!-- Monday -->
+<rect class="fill-slate-100 hover:fill-slate-200 transition-colors" height="42" rx="3" width="18" x="15" y="18"></rect>
+<text class="text-[9px] fill-slate-400 font-sans" text-anchor="middle" x="24" y="56">M</text>
+<!-- Tuesday -->
+<rect class="fill-slate-100 hover:fill-slate-200 transition-colors" height="50" rx="3" width="18" x="60" y="10"></rect>
+<text class="text-[9px] fill-slate-400 font-sans" text-anchor="middle" x="69" y="56">T</text>
+<!-- Wednesday (Today) -->
+<rect class="fill-blue-600" height="54" rx="3" width="18" x="105" y="6"></rect>
+<text class="text-[9px] fill-blue-600 font-semibold font-sans" text-anchor="middle" x="114" y="56">W</text>
+<!-- Thursday -->
+<rect class="fill-slate-100 hover:fill-slate-200 transition-colors" height="36" rx="3" width="18" x="150" y="24"></rect>
+<text class="text-[9px] fill-slate-400 font-sans" text-anchor="middle" x="159" y="56">T</text>
+<!-- Friday -->
+<rect class="fill-slate-100 hover:fill-slate-200 transition-colors" height="46" rx="3" width="18" x="195" y="14"></rect>
+<text class="text-[9px] fill-slate-400 font-sans" text-anchor="middle" x="204" y="56">F</text>
+<!-- Saturday -->
+<rect class="fill-slate-100 hover:fill-slate-200 transition-colors" height="30" rx="3" width="18" x="240" y="30"></rect>
+<text class="text-[9px] fill-slate-400 font-sans" text-anchor="middle" x="249" y="56">S</text>
+</svg>
+</div>
+<div class="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+<span>Peak Consultation Hours: 10:00 AM – 1:00 PM</span>
+<span class="text-emerald-600 font-medium">On Schedule</span>
+</div>
+</div>
+<!-- Payment Breakdown Strip -->
+<div class="bg-white p-5 rounded-xl border border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.02)] flex flex-col justify-between">
+<div class="flex items-center justify-between mb-4">
+<div>
+<h4 class="text-[13px] font-semibold text-slate-900">Settlement Channels</h4>
+<p class="text-[11px] text-slate-400">Token advances &amp; counter payments reconciliation</p>
+</div>
+<span class="text-[11px] font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">All Matched</span>
+</div>
+<div class="space-y-3">
+<div class="w-full h-2 rounded-full bg-slate-100 flex overflow-hidden">
+<div class="bg-slate-900 h-full" style="width: 68%" title="UPI: 68%"></div>
+<div class="bg-slate-400 h-full" style="width: 22%" title="Cash: 22%"></div>
+<div class="bg-slate-300 h-full" style="width: 10%" title="Card: 10%"></div>
+</div>
+<div class="grid grid-cols-3 gap-2 pt-1 text-center">
+<div class="p-2 rounded-lg bg-slate-50 border border-slate-100">
+<p class="text-[10px] text-slate-400 uppercase font-medium">UPI / QR</p>
+<p class="text-[13px] font-semibold text-slate-800">₹9,656</p>
+<p class="text-[10px] text-slate-400">68%</p>
+</div>
+<div class="p-2 rounded-lg bg-slate-50 border border-slate-100">
+<p class="text-[10px] text-slate-400 uppercase font-medium">Cash</p>
+<p class="text-[13px] font-semibold text-slate-800">₹3,124</p>
+<p class="text-[10px] text-slate-400">22%</p>
+</div>
+<div class="p-2 rounded-lg bg-slate-50 border border-slate-100">
+<p class="text-[10px] text-slate-400 uppercase font-medium">Card POS</p>
+<p class="text-[13px] font-semibold text-slate-800">₹1,420</p>
+<p class="text-[10px] text-slate-400">10%</p>
+</div>
+</div>
+</div>
+<div class="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+<span>Automated token fee adjustment applied</span>
+<span class="text-slate-600 font-medium">No double counts</span>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- DISCRETE FLOATING TOAST -->
+<div class="fixed bottom-6 right-6 bg-slate-900 text-white text-[13px] py-2 px-3.5 rounded-lg shadow-lg hidden transition-opacity z-50 flex items-center gap-2" id="quickToast">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+<span id="quickToastText">Action recorded</span>
+</div>
+<script>
+    function switchPatient(name, sub, token, complaint, status, bp, pulse, spo2, totalFee, paidFee, dueFee) {
+      document.getElementById('consoleName').innerText = name;
+      document.getElementById('consoleSub').innerText = sub + ' • ' + token + ' • APX-' + Math.floor(10000 + Math.random() * 90000);
+      document.getElementById('consoleTokenTag').innerText = token;
+      document.getElementById('patientStatusPill').innerText = status;
+      document.getElementById('vitalBP').innerText = bp;
+      document.getElementById('vitalPulse').innerText = pulse;
+      document.getElementById('vitalSpo2').innerText = spo2;
+      document.getElementById('consoleBalanceDue').innerHTML = dueFee + ' <span class="font-normal text-slate-400 text-[11px]">(' + paidFee + ' pre-paid)</span>';
+
+      showQuickToast('Loaded ' + name + ' into console');
+    }
+
+    function dismissAlert(msg) {
+      document.getElementById('earlyAlertRibbon').remove();
+      showQuickToast(msg);
+    }
+
+    function showQuickToast(msg) {
+      const toast = document.getElementById('quickToast');
+      const text = document.getElementById('quickToastText');
+      text.innerText = msg;
+      toast.classList.remove('hidden');
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 3000);
+    }
+  </script>
+</body></html>

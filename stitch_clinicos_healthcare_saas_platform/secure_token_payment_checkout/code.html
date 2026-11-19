@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "on-primary-fixed-variant": "#003ea8",
+          "on-error": "#ffffff",
+          "on-secondary": "#ffffff",
+          "outline-variant": "#c3c6d7",
+          "surface-variant": "#dae2fd",
+          "on-primary-fixed": "#00174b",
+          "on-secondary-fixed-variant": "#005049",
+          "surface-container-highest": "#dae2fd",
+          "on-surface": "#131b2e",
+          "tertiary-fixed": "#6ffbbe",
+          "primary-fixed": "#dbe1ff",
+          "on-background": "#131b2e",
+          "on-primary": "#ffffff",
+          "on-primary-container": "#eeefff",
+          "secondary": "#006a61",
+          "secondary-fixed-dim": "#6bd8cb",
+          "on-tertiary": "#ffffff",
+          "error-container": "#ffdad6",
+          "secondary-fixed": "#89f5e7",
+          "primary-container": "#2563eb",
+          "inverse-primary": "#b4c5ff",
+          "on-surface-variant": "#434655",
+          "outline": "#737686",
+          "surface-tint": "#0053db",
+          "on-tertiary-container": "#bdffdb",
+          "surface-container-low": "#f2f3ff",
+          "surface-dim": "#d2d9f4",
+          "surface-container": "#eaedff",
+          "on-secondary-fixed": "#00201d",
+          "surface-container-lowest": "#ffffff",
+          "on-tertiary-fixed-variant": "#005236",
+          "surface": "#faf8ff",
+          "tertiary-fixed-dim": "#4edea3",
+          "background": "#faf8ff",
+          "surface-container-high": "#e2e7ff",
+          "on-error-container": "#93000a",
+          "on-tertiary-fixed": "#002113",
+          "surface-bright": "#faf8ff",
+          "tertiary": "#006242",
+          "tertiary-container": "#007d55",
+          "primary": "#004ac6",
+          "error": "#ba1a1a",
+          "secondary-container": "#86f2e4",
+          "inverse-surface": "#283044",
+          "inverse-on-surface": "#eef0ff",
+          "on-secondary-container": "#006f66",
+          "primary-fixed-dim": "#b4c5ff"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.25rem",
+          "lg": "0.5rem",
+          "xl": "0.75rem",
+          "full": "9999px"
+        },
+        "spacing": {
+          "space-xl": "1.5rem",
+          "margin-md": "1.5rem",
+          "space-sm": "0.5rem",
+          "gutter": "1rem",
+          "space-xs": "0.25rem",
+          "margin": "1rem",
+          "space-2xl": "2rem",
+          "gutter-lg": "1.5rem",
+          "space-lg": "1rem",
+          "margin-lg": "2rem",
+          "space-md": "0.75rem"
+        },
+        "fontFamily": {
+          "headline-lg-mobile": [
+            "Inter"
+          ],
+          "headline-xl": [
+            "Inter"
+          ],
+          "headline-sm": [
+            "Inter"
+          ],
+          "body-sm": [
+            "Inter"
+          ],
+          "body-md": [
+            "Inter"
+          ],
+          "headline-xl-mobile": [
+            "Inter"
+          ],
+          "tabular-data": [
+            "Inter"
+          ],
+          "label-md": [
+            "Inter"
+          ],
+          "body-lg": [
+            "Inter"
+          ],
+          "label-sm": [
+            "Inter"
+          ],
+          "headline-lg": [
+            "Inter"
+          ],
+          "headline-md": [
+            "Inter"
+          ]
+        },
+        "fontSize": {
+          "headline-lg-mobile": [
+            "24px",
+            {
+              "lineHeight": "32px",
+              "letterSpacing": "-0.015em",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-xl": [
+            "36px",
+            {
+              "lineHeight": "44px",
+              "letterSpacing": "-0.025em",
+              "fontWeight": "700"
+            }
+          ],
+          "headline-sm": [
+            "16px",
+            {
+              "lineHeight": "24px",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "600"
+            }
+          ],
+          "body-sm": [
+            "13px",
+            {
+              "lineHeight": "18px",
+              "letterSpacing": "0em",
+              "fontWeight": "400"
+            }
+          ],
+          "body-md": [
+            "14px",
+            {
+              "lineHeight": "20px",
+              "letterSpacing": "0em",
+              "fontWeight": "400"
+            }
+          ],
+          "headline-xl-mobile": [
+            "28px",
+            {
+              "lineHeight": "36px",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "700"
+            }
+          ],
+          "tabular-data": [
+            "14px",
+            {
+              "lineHeight": "20px",
+              "letterSpacing": "0em",
+              "fontWeight": "500"
+            }
+          ],
+          "label-md": [
+            "12px",
+            {
+              "lineHeight": "16px",
+              "letterSpacing": "0.01em",
+              "fontWeight": "500"
+            }
+          ],
+          "body-lg": [
+            "16px",
+            {
+              "lineHeight": "24px",
+              "letterSpacing": "-0.005em",
+              "fontWeight": "400"
+            }
+          ],
+          "label-sm": [
+            "11px",
+            {
+              "lineHeight": "14px",
+              "letterSpacing": "0.02em",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-lg": [
+            "28px",
+            {
+              "lineHeight": "36px",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-md": [
+            "20px",
+            {
+              "lineHeight": "28px",
+              "letterSpacing": "-0.015em",
+              "fontWeight": "600"
+            }
+          ]
+        }
+      }
+    }
+  };</script></head><body class="bg-surface text-on-surface font-body-md text-body-md"><header class="fixed top-0 w-full z-50 bg-surface-container-lowest/95 backdrop-blur-md shadow-[0_1px_8px_rgba(15,23,42,0.06)]"><div class="h-20 w-full px-margin-lg flex items-center justify-between gap-space-lg"><div class="flex items-center gap-space-xl"><a class="flex items-center gap-space-sm" data-path="find-doctors" href="#"><div class="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center text-on-primary shadow-sm"><span class="material-symbols-outlined text-[24px]">cardiology</span></div><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-on-surface tracking-tight leading-none">CuraPulse</span><span class="font-label-sm text-label-sm text-secondary leading-tight mt-0.5 font-medium">HEALTHCARE</span></div></a><div class="hidden xl:flex items-center gap-space-xs bg-surface-container-low px-space-md py-space-xs rounded-full cursor-pointer hover:bg-surface-container transition-colors"><span class="material-symbols-outlined text-primary text-[18px]">location_on</span><span class="font-body-sm text-body-sm text-on-surface font-medium">Bengaluru</span><span class="material-symbols-outlined text-outline text-[16px]">expand_more</span></div></div><div class="hidden lg:flex items-center flex-1 max-w-md mx-space-md"><div class="relative w-full flex items-center bg-surface-container-low rounded-xl px-space-md py-space-xs"><span class="material-symbols-outlined text-outline text-[20px] mr-space-sm">search</span><input class="w-full bg-transparent border-none outline-none font-body-sm text-body-sm text-on-surface placeholder:text-on-surface-variant" placeholder="Search doctors, clinics, conditions..." type="text"/></div></div><nav class="hidden lg:flex items-center gap-space-xl" data-active-classes="text-primary font-bold border-b-2 border-primary"><a aria-current="page" class="transition-colors py-2 text-primary font-bold border-b-2 border-primary" data-path="find-doctors" href="#">Find Doctors</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors py-2" data-path="specializations" href="#">Specializations</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors py-2" data-path="how-it-works" href="#">How It Works</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors py-2" data-path="health-records" href="#">Health Records</a></nav><div class="flex items-center gap-space-md"><div class="hidden sm:flex items-center gap-space-xs bg-error-container/60 px-space-md py-space-xs rounded-full"><span class="w-2 h-2 rounded-full bg-error animate-pulse"></span><span class="font-label-sm text-label-sm text-on-error-container uppercase font-semibold">Helpline: 108</span></div><a class="hidden md:flex items-center gap-space-xs bg-primary hover:bg-on-primary-fixed-variant text-on-primary px-space-lg py-space-xs rounded-xl font-label-md text-label-md transition-colors shadow-sm" data-path="my-appointments" href="#"><span>My Appointments</span></a><a class="flex items-center gap-space-xs" data-path="sign-in" href="#"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></a></div></div></header><main class="w-full pt-20 bg-surface"><div class="flex flex-col w-full">
+<!-- Stepper Breadcrumb / Flow Indicator -->
+<section class="w-full bg-surface-container-low py-space-md px-margin-lg">
+<div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-xs text-on-surface-variant font-label-md text-label-md">
+<span class="material-symbols-outlined text-[18px] text-secondary">verified_user</span>
+<span class="tracking-wide uppercase text-on-surface font-semibold">CuraPulse Secure Checkout</span>
+<span class="text-outline">/</span>
+<span class="text-primary font-medium">Session #CP-8842-BLR</span>
+</div>
+<!-- Linear Stepper Bar -->
+<div class="flex items-center gap-space-sm sm:gap-space-md overflow-x-auto py-1">
+<!-- Step 1 -->
+<div class="flex items-center gap-space-xs text-secondary shrink-0">
+<div class="w-6 h-6 rounded-full bg-secondary text-on-secondary flex items-center justify-center font-label-sm text-label-sm shadow-sm">
+<span class="material-symbols-outlined text-[14px]">check</span>
+</div>
+<span class="font-label-md text-label-md font-medium text-on-surface">Doctor</span>
+</div>
+<div class="w-6 sm:w-10 h-0.5 bg-secondary-container"></div>
+<!-- Step 2 -->
+<div class="flex items-center gap-space-xs text-secondary shrink-0">
+<div class="w-6 h-6 rounded-full bg-secondary text-on-secondary flex items-center justify-center font-label-sm text-label-sm shadow-sm">
+<span class="material-symbols-outlined text-[14px]">check</span>
+</div>
+<span class="font-label-md text-label-md font-medium text-on-surface">Slot</span>
+</div>
+<div class="w-6 sm:w-10 h-0.5 bg-secondary-container"></div>
+<!-- Step 3 -->
+<div class="flex items-center gap-space-xs text-secondary shrink-0">
+<div class="w-6 h-6 rounded-full bg-secondary text-on-secondary flex items-center justify-center font-label-sm text-label-sm shadow-sm">
+<span class="material-symbols-outlined text-[14px]">check</span>
+</div>
+<span class="font-label-md text-label-md font-medium text-on-surface">Patient Info</span>
+</div>
+<div class="w-6 sm:w-10 h-0.5 bg-primary"></div>
+<!-- Step 4 (Active) -->
+<div class="flex items-center gap-space-xs shrink-0">
+<div class="w-6 h-6 rounded-full bg-primary text-on-primary flex items-center justify-center font-label-sm text-label-sm shadow-sm">
+<span class="w-2 h-2 rounded-full bg-surface animate-ping"></span>
+</div>
+<span class="font-label-md text-label-md font-semibold text-primary">Token Deposit</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Main Booking Canvas: Split Layout -->
+<main class="w-full max-w-7xl mx-auto px-margin-lg py-margin-lg">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter-lg items-start">
+<!-- LEFT COLUMN: Patient Info, Doctor Specs, & Transparent Ledger (7 Cols) -->
+<div class="lg:col-span-7 flex flex-col gap-space-lg">
+<!-- Clinical Booking Brief / Status Header -->
+<div class="bg-surface-container-lowest p-space-xl rounded-xl shadow-md relative overflow-hidden">
+<div class="absolute -right-12 -top-12 w-48 h-48 bg-primary/5 rounded-full pointer-events-none blur-2xl"></div>
+<div class="flex items-center justify-between gap-space-md flex-wrap pb-space-md mb-space-md bg-surface-container-low/50 -mx-space-xl -mt-space-xl p-space-md px-space-xl">
+<div class="flex items-center gap-space-xs">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-semibold tracking-wide uppercase">
+<span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+                Room #204 Reserved
+              </span>
+<span class="font-label-sm text-label-sm text-outline px-2 py-1 rounded bg-surface-container">Queue Index: #09</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-secondary text-[16px]">lock</span>
+              Protected OPD Escrow
+            </span>
+</div>
+<div class="flex items-start gap-space-md">
+<img class="w-16 h-16 rounded-xl object-cover shadow-sm shrink-0" data-alt="Professional headshot of senior Indian male cardiologist Dr Rajesh Sharma in clinical white doctor coat with stethoscope, soft clinic background, natural warm lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAiW3ZH4m7sqS6MnqMSgUxrXPoYQi6qaMQcj9k5gMh5Sml1dxP7Qlj7M3-IxTnUpOlpWowIYBW4NR4W1cZnPMTsxxtparbkj3lGrFnqqOZFk_3QLy7d4vy-55g4rI3_jaPppYW7TzkMk2jhBOmNWJHGl5LAsAtJOXNyyPuCLL25w_Kl5kv2L67hkI70A2Av8Gg61qUcYFkt46RbsA-RkSSFtulOFeBXf6cI6CatkfNc"/>
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-space-xs flex-wrap">
+<h1 class="font-headline-md text-headline-md text-on-surface truncate">Dr. Rajesh Sharma</h1>
+<span class="px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm font-medium">Cardiology</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5 truncate">MBBS, MD, DM (Cardiology) • 16 Years Clinical Practice</p>
+<div class="flex items-center gap-space-lg mt-space-sm flex-wrap text-on-surface">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[18px]">domain</span>
+<span class="font-body-sm text-body-sm font-medium">Apex Health Hub, Indiranagar</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[18px]">calendar_today</span>
+<span class="font-body-sm text-body-sm font-medium">Today, 24 Oct 2024 at 11:00 AM</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Patient Demographics Accordion Card -->
+<div class="bg-surface-container-lowest p-space-xl rounded-xl shadow-md">
+<div class="flex items-center justify-between mb-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[20px]">person_check</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Patient Dossier</h2>
+</div>
+<span class="text-primary font-label-md text-label-md cursor-pointer hover:underline">Edit Info</span>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-md p-space-md bg-surface-container-low rounded-lg">
+<div>
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider block">Registered Patient</span>
+<p class="font-body-md text-body-md text-on-surface font-semibold mt-0.5">Priya Nair</p>
+<span class="font-body-sm text-body-sm text-on-surface-variant">34 Yrs • Female • Blood Group: B+</span>
+</div>
+<div>
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider block">Contact Reference</span>
+<p class="font-tabular-data text-tabular-data text-on-surface mt-0.5">+91 98450 31209</p>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate block">priya.nair@example.com</span>
+</div>
+<div class="sm:col-span-2 pt-space-xs bg-surface-container-lowest/60 p-space-sm rounded">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider block">Primary Consultation Objective</span>
+<p class="font-body-md text-body-md text-on-surface mt-0.5">
+                Routine Cardiac Follow-up &amp; Medication Titration (Post-Holter Evaluation)
+              </p>
+</div>
+</div>
+</div>
+<!-- Transparent Token Ledger Card (Guaranteed Zero Double-Counting) -->
+<div class="bg-surface-container-lowest p-space-xl rounded-xl shadow-md">
+<div class="flex items-center justify-between mb-space-sm">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-secondary text-[20px]">receipt_long</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Transparent Token Ledger</h2>
+</div>
+<span class="px-2.5 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-semibold">Zero Double Count</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-space-lg">
+            CuraPulse uses verified clinic escrow. Advance deposit is subtracted 1:1 on arrival at Indiranagar billing.
+          </p>
+<!-- Ledger Table -->
+<div class="space-y-space-sm">
+<div class="flex justify-between items-center py-space-xs text-on-surface">
+<div class="flex items-center gap-space-xs">
+<span class="font-body-md text-body-md">Apex Hospital Standard Consultation Fee</span>
+<span class="material-symbols-outlined text-outline text-[16px]" title="Standard specialist rate verified by Karnataka Medical Council">info</span>
+</div>
+<span class="font-tabular-data text-tabular-data font-semibold">₹700.00</span>
+</div>
+<div class="flex justify-between items-center py-space-xs text-primary font-medium bg-primary-fixed/20 p-space-sm rounded-lg">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[18px]">lock_clock</span>
+<span class="font-body-md text-body-md font-semibold">Advance Online Priority Token Deposit</span>
+</div>
+<span class="font-tabular-data text-tabular-data font-bold">₹100.00</span>
+</div>
+<div class="flex justify-between items-center py-space-xs text-on-surface-variant">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[16px] text-outline">account_balance_wallet</span>
+<span class="font-body-md text-body-md">Balance to be Collected at Reception Desk</span>
+</div>
+<span class="font-tabular-data text-tabular-data">₹600.00</span>
+</div>
+<div class="flex justify-between items-center py-space-xs text-outline text-label-md">
+<span>Platform Facilitation &amp; Escrow Charges</span>
+<span class="text-tertiary font-semibold uppercase">₹0.00 (Waived)</span>
+</div>
+<!-- Total Bar -->
+<div class="bg-surface-container-high p-space-md rounded-xl mt-space-md flex items-center justify-between">
+<div>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider block">Net Patient Out-of-Pocket</span>
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">₹700.00</span>
+</div>
+<div class="text-right">
+<span class="font-label-sm text-label-sm text-secondary font-semibold uppercase block">Paying Now Online</span>
+<span class="font-headline-lg text-headline-lg text-primary font-bold">₹100</span>
+</div>
+</div>
+</div>
+<!-- Escrow Micro-Audit Badge -->
+<div class="mt-space-lg flex items-center gap-space-sm p-space-sm rounded-lg bg-surface-container-low text-on-surface-variant">
+<span class="material-symbols-outlined text-tertiary text-[20px]">format_image_left</span>
+<span class="font-body-sm text-body-sm">
+<strong class="text-on-surface font-semibold">100% Refund Assurance:</strong> In case of doctor emergency rescheduling, the advance token deposit is instantaneously remitted to source without cancellation penalty.
+            </span>
+</div>
+</div>
+<!-- Clinic Location Context Card -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex items-center gap-space-md">
+<div class="w-20 h-20 rounded-lg overflow-hidden shrink-0" data-location="Indiranagar, Bengaluru" style="">
+<img class="w-full h-full object-cover" data-alt="Map location pin view of Apex Health Hub in Indiranagar Bengaluru with clean streets and hospital marker" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA_kEWVx05ztzCHVjqBrNsIo30Ox2piJN6R4HZOocTWIJbF5hUmTpKCuo6d69Qme6-fXnaDALvgXv46XLCu4XqKADeds1Lns-cCZo_prn-ZAxzHaRqK7SHE160sAtmsnxXUU0-wJKETgYI-NBVKMFF3vv-RkLjIba_FBSTfP04PRC52SKUzd463_V-o_xif-w9VSdwb5pF3aSrsTY0AX9-AB0XkOsp8T9AQFlzI1e3Q"/>
+</div>
+<div class="flex-1 min-w-0">
+<span class="font-label-sm text-label-sm text-outline uppercase font-semibold">Clinic Check-in Node</span>
+<p class="font-headline-sm text-headline-sm text-on-surface truncate">Apex Health Hub • Block 2</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">100ft Road, Near CMH Junction, Indiranagar, Bengaluru 560038</p>
+</div>
+<a class="px-space-md py-space-xs rounded-lg bg-surface-container-high hover:bg-surface-container text-on-surface font-label-md text-label-md shrink-0 flex items-center gap-1 transition-colors" href="#">
+<span class="material-symbols-outlined text-[16px]">directions</span>
+            Route
+          </a>
+</div>
+</div>
+<!-- RIGHT COLUMN: Payment Gateway Modal / Execution Box (5 Cols) -->
+<div class="lg:col-span-5 sticky top-24">
+<div class="bg-surface-container-lowest rounded-2xl shadow-xl overflow-hidden">
+<!-- Payment Box Header & Countdown -->
+<div class="bg-surface-container-highest p-space-xl">
+<div class="flex items-center justify-between">
+<div>
+<span class="font-label-sm text-label-sm text-primary uppercase font-bold tracking-wider">Fast-Track OPD Allocation</span>
+<h3 class="font-headline-lg text-headline-lg text-on-surface font-bold">Pay Token ₹100</h3>
+</div>
+<div class="text-right">
+<span class="font-label-sm text-label-sm text-error uppercase font-bold tracking-wider block">Holding Token #09</span>
+<div class="flex items-center gap-1 bg-surface-container-lowest px-space-sm py-1 rounded-full shadow-sm text-error font-tabular-data text-tabular-data font-bold">
+<span class="material-symbols-outlined text-[16px] animate-spin">timer</span>
+<span id="bookingTimer">09:42</span>
+</div>
+</div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-space-xs">
+              Doctor consultation window is temporarily locked for your profile. Complete reservation below.
+            </p>
+</div>
+<!-- Method Selector Tabs -->
+<div class="p-space-lg">
+<div class="flex bg-surface-container-low p-1 rounded-xl mb-space-lg text-on-surface">
+<button class="flex-1 py-space-xs rounded-lg font-label-md text-label-md font-semibold text-center transition-all bg-surface-container-lowest text-primary shadow-sm flex items-center justify-center gap-1" id="tabUpi" onclick="switchTab('upi')">
+<span class="material-symbols-outlined text-[16px]">qr_code_scanner</span>
+                Instant UPI
+              </button>
+<button class="flex-1 py-space-xs rounded-lg font-label-md text-label-md font-medium text-center transition-all text-on-surface-variant hover:text-on-surface flex items-center justify-center gap-1" id="tabCards" onclick="switchTab('cards')">
+<span class="material-symbols-outlined text-[16px]">credit_card</span>
+                Cards
+              </button>
+<button class="flex-1 py-space-xs rounded-lg font-label-md text-label-md font-medium text-center transition-all text-on-surface-variant hover:text-on-surface flex items-center justify-center gap-1" id="tabNet" onclick="switchTab('net')">
+<span class="material-symbols-outlined text-[16px]">account_balance</span>
+                Net Banking
+              </button>
+</div>
+<!-- TAB CONTENT 1: UPI -->
+<div class="space-y-space-lg" id="contentUpi">
+<!-- Quick App Deep-links -->
+<div>
+<span class="font-label-sm text-label-sm text-outline uppercase font-semibold block mb-space-xs">Fast Direct Pay Via App</span>
+<div class="grid grid-cols-4 gap-space-xs">
+<button class="p-space-sm rounded-xl bg-surface-container-low hover:bg-surface-container flex flex-col items-center gap-1 transition-all" type="button">
+<div class="w-10 h-10 rounded-full bg-surface-container-lowest flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-primary text-[22px]">payments</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface font-medium">GPay</span>
+</button>
+<button class="p-space-sm rounded-xl bg-surface-container-low hover:bg-surface-container flex flex-col items-center gap-1 transition-all" type="button">
+<div class="w-10 h-10 rounded-full bg-surface-container-lowest flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-secondary text-[22px]">currency_rupee</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface font-medium">PhonePe</span>
+</button>
+<button class="p-space-sm rounded-xl bg-surface-container-low hover:bg-surface-container flex flex-col items-center gap-1 transition-all" type="button">
+<div class="w-10 h-10 rounded-full bg-surface-container-lowest flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-tertiary text-[22px]">wallet</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface font-medium">Paytm</span>
+</button>
+<button class="p-space-sm rounded-xl bg-surface-container-low hover:bg-surface-container flex flex-col items-center gap-1 transition-all" type="button">
+<div class="w-10 h-10 rounded-full bg-surface-container-lowest flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-on-surface text-[22px]">hub</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface font-medium">BHIM</span>
+</button>
+</div>
+</div>
+<!-- QR Code & VPA Split -->
+<div class="p-space-md rounded-xl bg-surface-container-low flex flex-col sm:flex-row items-center gap-space-md">
+<!-- Inline SVG Clean Dynamic QR Placeholder -->
+<div class="w-28 h-28 bg-surface-container-lowest p-2 rounded-xl shadow-sm shrink-0 flex flex-col items-center justify-center">
+<svg class="w-24 h-24 text-on-surface" fill="currentColor" viewbox="0 0 100 100">
+<path d="M10,10 h30 v30 h-30 z M16,16 v18 h18 v-18 z M22,22 h6 v6 h-6 z"></path>
+<path d="M60,10 h30 v30 h-30 z M66,16 v18 h18 v-18 z M72,22 h6 v6 h-6 z"></path>
+<path d="M10,60 h30 v30 h-30 z M16,66 v18 h18 v-18 z M22,72 h6 v6 h-6 z"></path>
+<rect height="24" width="8" x="46" y="10"></rect>
+<rect height="8" width="16" x="46" y="42"></rect>
+<rect height="8" width="20" x="70" y="42"></rect>
+<rect height="32" width="8" x="46" y="58"></rect>
+<rect height="12" width="12" x="62" y="58"></rect>
+<rect height="14" width="10" x="80" y="76"></rect>
+<rect height="12" width="12" x="62" y="78"></rect>
+</svg>
+<span class="text-[9px] font-mono tracking-widest text-outline mt-0.5">SCAN TO PAY</span>
+</div>
+<div class="flex-1 min-w-0 text-center sm:text-left">
+<div class="inline-flex items-center gap-1 text-secondary font-label-sm text-label-sm font-semibold mb-1">
+<span class="material-symbols-outlined text-[14px]">bolt</span>
+                    Zero Latency Settlement
+                  </div>
+<p class="font-body-sm text-body-sm text-on-surface">Scan with any UPI application on your mobile device</p>
+<span class="font-label-sm text-label-sm text-outline mt-1 block">UPI ID: curapulse.apex@icici</span>
+</div>
+</div>
+<!-- Enter UPI ID Field -->
+<div class="space-y-space-xs">
+<label class="font-label-md text-label-md text-on-surface font-medium block" for="vpaInput">
+                  Or enter Virtual Payment Address (UPI ID)
+                </label>
+<div class="relative flex items-center">
+<input class="w-full h-10 px-space-md pr-24 rounded-lg bg-surface-container-lowest text-on-surface text-body-md outline-none focus:bg-surface-container-low transition-all shadow-sm" id="vpaInput" placeholder="e.g. mobile@upi" type="text" value="priya@okaxis"/>
+<button class="absolute right-1 top-1 bottom-1 px-3 bg-secondary-container hover:bg-secondary text-on-secondary-container hover:text-on-secondary rounded font-label-sm text-label-sm font-semibold transition-colors" type="button">
+                    Verify
+                  </button>
+</div>
+<span class="font-label-sm text-label-sm text-tertiary flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+                  Verified: PRIYA NAIR (AXIS BANK)
+                </span>
+</div>
+</div>
+<!-- TAB CONTENT 2: Cards (Hidden by default, switched via JS) -->
+<div class="hidden space-y-space-md" id="contentCards">
+<div>
+<label class="font-label-sm text-label-sm text-outline uppercase font-semibold block mb-1">Card Number</label>
+<div class="relative flex items-center">
+<input class="w-full h-10 px-space-md rounded-lg bg-surface-container-low text-on-surface text-body-md outline-none focus:bg-surface-container-lowest shadow-sm" placeholder="4532 •••• •••• 8821" type="text"/>
+<div class="absolute right-3 flex items-center gap-1 text-outline">
+<span class="font-label-sm text-label-sm font-bold text-primary">VISA</span>
+<span class="font-label-sm text-label-sm font-bold text-secondary">MC</span>
+<span class="font-label-sm text-label-sm font-bold text-tertiary">RuPay</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-space-md">
+<div>
+<label class="font-label-sm text-label-sm text-outline uppercase font-semibold block mb-1">Expiry MM/YY</label>
+<input class="w-full h-10 px-space-md rounded-lg bg-surface-container-low text-on-surface text-body-md outline-none focus:bg-surface-container-lowest shadow-sm" placeholder="11 / 28" type="text"/>
+</div>
+<div>
+<label class="font-label-sm text-label-sm text-outline uppercase font-semibold block mb-1">CVV / CVC</label>
+<input class="w-full h-10 px-space-md rounded-lg bg-surface-container-low text-on-surface text-body-md outline-none focus:bg-surface-container-lowest shadow-sm" maxlength="4" placeholder="•••" type="password"/>
+</div>
+</div>
+<div>
+<label class="font-label-sm text-label-sm text-outline uppercase font-semibold block mb-1">Cardholder Name</label>
+<input class="w-full h-10 px-space-md rounded-lg bg-surface-container-low text-on-surface text-body-md outline-none focus:bg-surface-container-lowest shadow-sm" type="text" value="PRIYA NAIR"/>
+</div>
+</div>
+<!-- TAB CONTENT 3: Net Banking (Hidden by default) -->
+<div class="hidden space-y-space-md" id="contentNet">
+<span class="font-label-sm text-label-sm text-outline uppercase font-semibold block">Select Primary Scheduled Bank</span>
+<div class="grid grid-cols-2 gap-space-xs">
+<label class="flex items-center gap-space-xs p-space-sm rounded-lg bg-surface-container-low hover:bg-surface-container cursor-pointer">
+<input checked="" class="text-primary" name="bank" type="radio"/>
+<span class="font-body-sm text-body-sm text-on-surface font-medium">HDFC Bank</span>
+</label>
+<label class="flex items-center gap-space-xs p-space-sm rounded-lg bg-surface-container-low hover:bg-surface-container cursor-pointer">
+<input class="text-primary" name="bank" type="radio"/>
+<span class="font-body-sm text-body-sm text-on-surface font-medium">ICICI Bank</span>
+</label>
+<label class="flex items-center gap-space-xs p-space-sm rounded-lg bg-surface-container-low hover:bg-surface-container cursor-pointer">
+<input class="text-primary" name="bank" type="radio"/>
+<span class="font-body-sm text-body-sm text-on-surface font-medium">State Bank of India</span>
+</label>
+<label class="flex items-center gap-space-xs p-space-sm rounded-lg bg-surface-container-low hover:bg-surface-container cursor-pointer">
+<input class="text-primary" name="bank" type="radio"/>
+<span class="font-body-sm text-body-sm text-on-surface font-medium">Axis Bank</span>
+</label>
+</div>
+<div>
+<label class="font-label-sm text-label-sm text-outline uppercase font-semibold block mb-1">Other Available Banks</label>
+<select class="w-full h-10 px-space-md rounded-lg bg-surface-container-low text-on-surface text-body-md outline-none">
+<option>Kotak Mahindra Bank</option>
+<option>Punjab National Bank</option>
+<option>Bank of Baroda</option>
+<option>Canara Bank</option>
+</select>
+</div>
+</div>
+<!-- Primary Call to Action Button -->
+<div class="mt-space-lg pt-space-md">
+<button class="w-full h-12 bg-primary hover:bg-on-primary-fixed-variant text-on-primary rounded-xl font-headline-sm text-headline-sm flex items-center justify-center gap-space-xs transition-all shadow-md active:scale-[0.99]" id="payButton" onclick="triggerCheckoutSuccess()" type="button">
+<span class="material-symbols-outlined text-[20px]">lock</span>
+<span>Pay ₹100 &amp; Confirm Token #09</span>
+</button>
+</div>
+<!-- Reassurance Micro-Copy -->
+<p class="font-body-sm text-body-sm text-on-surface-variant text-center mt-space-md leading-relaxed">
+              Your ₹100 token directly locks Room #204 for your arrival. It is credited directly against your final clinic invoice.
+            </p>
+<!-- Compliance & Security Trust Badges -->
+<div class="mt-space-lg pt-space-md bg-surface-container-low/50 -mx-space-lg -mb-space-lg p-space-md flex items-center justify-around text-on-surface-variant">
+<div class="flex items-center gap-1 text-[11px] font-medium">
+<span class="material-symbols-outlined text-secondary text-[16px]">verified</span>
+                RBI 2-Factor Auth
+              </div>
+<div class="flex items-center gap-1 text-[11px] font-medium">
+<span class="material-symbols-outlined text-tertiary text-[16px]">security</span>
+                256-bit TLS Encrypted
+              </div>
+<div class="flex items-center gap-1 text-[11px] font-medium">
+<span class="material-symbols-outlined text-primary text-[16px]">chat</span>
+                WhatsApp Receipt
+              </div>
+</div>
+</div>
+</div>
+<!-- Appointment Assurance Callout -->
+<div class="mt-space-md bg-surface-container-low rounded-xl p-space-md flex items-center justify-between text-on-surface">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[20px]">notifications_active</span>
+<span class="font-body-sm text-body-sm">SMS &amp; WhatsApp alerts enabled for <span class="font-semibold">+91 98450 31209</span></span>
+</div>
+<span class="font-label-sm text-label-sm text-secondary font-bold uppercase">Active</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Interactive Modal Toast Placeholder for Confirmation Demo -->
+<div class="fixed bottom-6 right-6 max-w-md bg-surface-container-lowest shadow-2xl rounded-2xl p-space-lg border-l-4 border-tertiary transform translate-y-32 opacity-0 transition-all duration-300 pointer-events-none z-50 flex items-start gap-space-md" id="confirmationToast">
+<div class="w-10 h-10 rounded-full bg-tertiary text-on-tertiary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px]">check</span>
+</div>
+<div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface">Token #09 Locked!</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+        Advance payment of ₹100 verified. Dr. Rajesh Sharma notified for 11:00 AM. Check WhatsApp for token QR slip.
+      </p>
+</div>
+</div>
+</div>
+<script>
+  // Countdown Timer Logic (09:42 -> 00:00)
+  (function initTimer() {
+    let duration = 9 * 60 + 42;
+    const timerDisplay = document.getElementById('bookingTimer');
+    if (!timerDisplay) return;
+
+    const interval = setInterval(() => {
+      const minutes = Math.floor(duration / 60);
+      const seconds = duration % 60;
+      timerDisplay.textContent = 
+        (minutes < 10 ? '0' : '') + minutes + ':' + 
+        (seconds < 10 ? '0' : '') + seconds;
+
+      if (--duration < 0) {
+        clearInterval(interval);
+        timerDisplay.textContent = '00:00';
+      }
+    }, 1000);
+  })();
+
+  // Payment Tabs Switcher
+  function switchTab(type) {
+    const tabUpi = document.getElementById('tabUpi');
+    const tabCards = document.getElementById('tabCards');
+    const tabNet = document.getElementById('tabNet');
+
+    const contentUpi = document.getElementById('contentUpi');
+    const contentCards = document.getElementById('contentCards');
+    const contentNet = document.getElementById('contentNet');
+
+    // Reset All Buttons
+    [tabUpi, tabCards, tabNet].forEach(btn => {
+      btn.className = "flex-1 py-space-xs rounded-lg font-label-md text-label-md font-medium text-center transition-all text-on-surface-variant hover:text-on-surface flex items-center justify-center gap-1";
+    });
+
+    // Reset All Content
+    contentUpi.classList.add('hidden');
+    contentCards.classList.add('hidden');
+    contentNet.classList.add('hidden');
+
+    if (type === 'upi') {
+      tabUpi.className = "flex-1 py-space-xs rounded-lg font-label-md text-label-md font-semibold text-center transition-all bg-surface-container-lowest text-primary shadow-sm flex items-center justify-center gap-1";
+      contentUpi.classList.remove('hidden');
+    } else if (type === 'cards') {
+      tabCards.className = "flex-1 py-space-xs rounded-lg font-label-md text-label-md font-semibold text-center transition-all bg-surface-container-lowest text-primary shadow-sm flex items-center justify-center gap-1";
+      contentCards.classList.remove('hidden');
+    } else if (type === 'net') {
+      tabNet.className = "flex-1 py-space-xs rounded-lg font-label-md text-label-md font-semibold text-center transition-all bg-surface-container-lowest text-primary shadow-sm flex items-center justify-center gap-1";
+      contentNet.classList.remove('hidden');
+    }
+  }
+
+  // Checkout Success Interaction Simulation
+  function triggerCheckoutSuccess() {
+    const btn = document.getElementById('payButton');
+    const toast = document.getElementById('confirmationToast');
+    if (!btn || !toast) return;
+
+    btn.disabled = true;
+    btn.innerHTML = `<span class="material-symbols-outlined text-[20px] animate-spin">refresh</span><span>Transacting Escrow...</span>`;
+
+    setTimeout(() => {
+      btn.innerHTML = `<span class="material-symbols-outlined text-[20px]">check_circle</span><span>Token #09 Confirmed</span>`;
+      btn.classList.remove('bg-primary', 'hover:bg-on-primary-fixed-variant');
+      btn.classList.add('bg-tertiary', 'text-on-tertiary');
+      
+      // Reveal Toast
+      toast.classList.remove('translate-y-32', 'opacity-0', 'pointer-events-none');
+      toast.classList.add('translate-y-0', 'opacity-100');
+    }, 1200);
+  }
+</script></main><footer class="w-full bg-surface-container-lowest shadow-[0_-1px_6px_rgba(15,23,42,0.03)] py-margin-lg mt-margin-lg"><div class="w-full px-margin-lg flex flex-col md:flex-row items-center justify-between gap-space-md"><div class="flex items-center gap-space-sm"><div class="w-7 h-7 rounded-lg bg-primary-container flex items-center justify-center text-on-primary"><span class="material-symbols-outlined text-[16px]">cardiology</span></div><span class="font-headline-sm text-headline-sm text-on-surface">CuraPulse</span><span class="font-body-sm text-body-sm text-outline ml-space-sm">© 2024 CuraPulse Technologies. Clinical Precision.</span></div><div class="flex items-center gap-space-xl text-on-surface-variant"><a class="font-body-sm text-body-sm hover:text-on-surface transition-colors" data-path="how-it-works" href="#">Privacy Policy</a><a class="font-body-sm text-body-sm hover:text-on-surface transition-colors" data-path="how-it-works" href="#">Terms of Clinical Service</a><a class="font-body-sm text-body-sm hover:text-on-surface transition-colors" data-path="find-doctors" href="#">Patient Helpdesk</a></div></div></footer></body></html>
